@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "697423789058",
+    "project_id": "dabbawala-93883",
+    "storage_bucket": "dabbawala-93883.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697423789058:android:b66b7a8797189c0893bb1b",
+        "android_client_info": {
+          "package_name": "com.example.new1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIs6Y-KKueoluzKtIQJboyl2Is3pyIAcI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
