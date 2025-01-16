@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-class thursday extends StatelessWidget {
+class butterchicken extends StatelessWidget {
+  final DatabaseReference database = FirebaseDatabase.instance.ref();
+
+  void addToCart() {
+    database.child('cart').push().set({
+      'name': 'Butter Chicken',
+      'price': 150,
+      'description': 'Butter Chicken ',
+      'quantity': 1,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,14 +23,13 @@ class thursday extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Color(0xFF000000)),
           onPressed: () {
-            Navigator.pushNamed(context, 'MenuPage');
+            Navigator.pushNamed(context, 'nonveg');
           },
         ),
         actions: [
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Color(0xFF000000)),
             onPressed: () {
-              // Navigate to the Cart Page
               Navigator.pushNamed(context, 'card');
             },
           ),
@@ -33,7 +44,7 @@ class thursday extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black,
                     spreadRadius: 4,
                     blurRadius: 8,
                     offset: Offset(0, 4),
@@ -42,16 +53,16 @@ class thursday extends StatelessWidget {
               ),
               child: ClipOval(
                 child: Image.asset(
-                  'assets/thu.jpg', // Path to your local image asset
-                  width: 400,
-                  height: 400,
+                  'assets/butterchicken.png', // Path to your local image asset
+                  width: 300,
+                  height: 300,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             SizedBox(height: 20),
             Text(
-              'Panner Roti Rice',
+              'Butter Chicken',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -66,7 +77,7 @@ class thursday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              '\₹ 120',
+              '₹ 150',
               style: TextStyle(
                 fontSize: 24,
                 color: Color(0xFF0223FA),
@@ -74,7 +85,7 @@ class thursday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Panner Roti Rice Full INDIAN Dish ',
+              'Butter Chicken',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -84,13 +95,12 @@ class thursday extends StatelessWidget {
             Spacer(),
             ElevatedButton(
               onPressed: () {
+                addToCart();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Add Panner Roti Rice to cart!'),
+                    content: Text('Added Butter Chicken to cart!'),
                   ),
                 );
-
-                // Navigate to the Cart Page
                 Navigator.pushNamed(context, 'card');
               },
               style: ElevatedButton.styleFrom(
@@ -101,27 +111,12 @@ class thursday extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Add Card',
+                'Add to Cart',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// CartPage Widget (Example)
-class CartPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cart'),
-      ),
-      body: Center(
-        child: Text('Cart Page'),
       ),
     );
   }

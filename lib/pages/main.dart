@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'Home Pages/food pages/food iteam page/bangda.dart';
+import 'Home Pages/food pages/food iteam page/butterchicken.dart';
+import 'Home Pages/food pages/food iteam page/chicken non.dart';
+import 'Home Pages/food pages/food iteam page/chickennoodles.dart';
+import 'Home Pages/food pages/food iteam page/fishcurry.dart';
+import 'Home Pages/food pages/food iteam page/fried fish.dart';
 import 'login pages/login.dart';
 import 'login pages/signup.dart';
 import 'Home Pages/food pages/todays offer/10off.dart';
@@ -34,18 +41,18 @@ import 'Home Pages/menu pages/thursday.dart';
 import 'Home Pages/menu pages/friday.dart';
 import 'Home Pages/menu pages/saturday.dart';
 
-void main()
-{
+void main() async { WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
-  runApp(MyApp());
-}
+  runApp(MyApp()); }
 
 class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Login Example',
-      initialRoute: 'login',
+  @override Widget build(BuildContext context)
+  {
+    return MaterialApp( title: 'DabbaWala',
+      theme: ThemeData(
+      primarySwatch: Colors.blue, ),
+      home: login(),
       routes: {
         'login': (context) => login( ),
         'signup': (context) => signup(),
@@ -54,6 +61,12 @@ class MyApp extends StatelessWidget {
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
         'vegfoodpage': (context) => vegfoodpage(),
         'nonveg': (context) => nonveg(),
+        'butterchicken': (context) => butterchicken(),
+        'fish': (context) => fish(),
+        'bangda': (context) => bangda(),
+        'chickennoodles': (context) => chickennoodles(),
+        'fishcurry': (context) => fishcurry(),
+        'chickennon': (context) => chickennon(),
         'FoodGoHomePage': (context) => FoodGoHomePage(),
         'sub': (context) => sub(),
         'MenuPage': (context) => MenuPage(),

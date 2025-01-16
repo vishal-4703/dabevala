@@ -1,9 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-
-
-
-
 
 class FoodGoHomePage extends StatelessWidget {
   @override
@@ -86,18 +82,33 @@ class FoodGoHomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CategoryButton(label: 'Veg', onSelected: (_) {
-                    Navigator.pushNamed(context, 'vegfoodpage');
-                  }),
-                  CategoryButton(label: "Non Veg", onSelected: (_) {
-                    Navigator.pushNamed(context, 'nonveg');
-                  }),
+                  // Veg Button
+                 // Expanded(
+                    //child: CategoryButton(
+                     // label: 'Veg',
+                      //onSelected: (_) {
+                      //  Navigator.pushNamed(context, 'vegfoodpage');
+                     // },
+                   // ),
+                 // ),
+                  SizedBox(width: 10,height: 120, ), // Add spacing between buttons
+                  // Non Veg Button
+                  Expanded(
+                    flex: 2, // Increase the flex value to make this button wider
+                    child: CategoryButton(
+                      label: "Non Veg",
+                      onSelected: (_) {
+                        Navigator.pushNamed(context, 'nonveg');
+                      },
+                    ),
+                  ),
                 ],
               ),
+
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -199,32 +210,33 @@ class FoodGoHomePage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
+
         shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: Icon(Icons.home, color: Colors.blue, size: 30),
+              icon: Icon(Icons.home, color: Colors.blue, size: 40),
               onPressed: () {
                 Navigator.pushNamed(context, 'FoodGoHomePage');
               },
             ),
             IconButton(
-              icon: Icon(Icons.fastfood, color: Colors.grey, size: 30),
+              icon: Icon(Icons.fastfood, color: Colors.grey, size: 40),
               onPressed: () {
                 Navigator.pushNamed(context, 'MenuPage');
               },
             ),
             SizedBox(width: 30),
             IconButton(
-              icon: Icon(Icons.card_membership, color: Colors.grey, size: 30),
+              icon: Icon(Icons.card_membership, color: Colors.grey, size: 40),
               onPressed: () {
                 Navigator.pushNamed(context, 'sub');
               },
             ),
             IconButton(
-              icon: Icon(Icons.person, color: Colors.grey, size: 30),
+              icon: Icon(Icons.person, color: Colors.grey, size: 40),
               onPressed: () {
                 Navigator.pushNamed(context, 'ProfilePage');
               },
@@ -232,12 +244,6 @@ class FoodGoHomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
@@ -260,7 +266,12 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onPressed,
+      onTap: () {
+        FirebaseAuth.instance.signOut();
+        Navigator.pushNamed(context, "/login");
+        showToast(message: "Successfully signed out");
+      },
+
       child: Container(
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -286,6 +297,8 @@ class OfferCard extends StatelessWidget {
       ),
     );
   }
+
+  void showToast({required String message}) {}
 }
 
 class CategoryButton extends StatelessWidget {
@@ -338,7 +351,7 @@ class PopularCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 6)],
         ),
-        width: 150,
+        width: 200,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

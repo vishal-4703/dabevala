@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class thursday extends StatelessWidget {
+class chickennon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,7 +11,7 @@ class thursday extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Color(0xFF000000)),
           onPressed: () {
-            Navigator.pushNamed(context, 'MenuPage');
+            Navigator.pushNamed(context, 'nonveg');
           },
         ),
         actions: [
@@ -42,7 +42,7 @@ class thursday extends StatelessWidget {
               ),
               child: ClipOval(
                 child: Image.asset(
-                  'assets/thu.jpg', // Path to your local image asset
+                  'assets/chicken.png', // Path to your local image asset
                   width: 400,
                   height: 400,
                   fit: BoxFit.cover,
@@ -51,7 +51,7 @@ class thursday extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Panner Roti Rice',
+              'Chicken',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -66,7 +66,7 @@ class thursday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              '\₹ 120',
+              '\₹ 150',
               style: TextStyle(
                 fontSize: 24,
                 color: Color(0xFF0223FA),
@@ -74,7 +74,7 @@ class thursday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Panner Roti Rice Full INDIAN Dish ',
+              'Chicken Full INDIAN Dish ',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -86,7 +86,7 @@ class thursday extends StatelessWidget {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Add Panner Roti Rice to cart!'),
+                    content: Text('Added Chicken  to cart!'),
                   ),
                 );
 
@@ -101,7 +101,7 @@ class thursday extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Add Card',
+                'Order Now',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),

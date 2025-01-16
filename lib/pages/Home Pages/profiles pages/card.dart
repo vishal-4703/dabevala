@@ -1,25 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class card extends StatefulWidget {
   @override
   _cardState createState() => _cardState();
 }
+
 class _cardState extends State<card> {
-  int Quantity = 1;
-  int DalQuantity = 1;
-  int chanaQuantity = 1;
-  int aaluQuantity = 1;
-  int pannerQuantity = 1;
-  int soyabinQuantity = 1;
+  final CollectionReference cartItems =
+  FirebaseFirestore.instance.collection('cartItems');
 
-  double get subtotal {
-    return (Quantity * 150 +
-        Quantity * 130 +
-        Quantity * 120 +
-        Quantity * 150 +
-        Quantity * 120 +
-       Quantity * 150);
+  double subtotal = 0.0;
 
+  void calculateSubtotal() {
+    cartItems.get().then((querySnapshot) {
+      double total = 0.0;
+      querySnapshot.docs.forEach((doc) {
+        int quantity = doc['quantity'];
+        double price = doc['price'];
+        total += quantity * price;
+      });
+      setState(() {
+        subtotal = total;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    calculateSubtotal();
+  }
+
+  Future<void> updateQuantity(String itemName, int quantity) async {
+    await cartItems.doc(itemName).update({'quantity': quantity});
+    calculateSubtotal();
   }
 
   @override
@@ -43,59 +59,31 @@ class _cardState extends State<card> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align items to the left
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCartItem(
-                'assets/sun.jpg', // Replace with actual image paths
-                'Shai Panner',
-                'Delicious Indian food VEG',
-                4.5,
-                Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
+              StreamBuilder(
+                stream: cartItems.snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (!snapshot.hasData) {
+                    return CircularProgressIndicator();
+                  }
+                  return Column(
+                    children: snapshot.data!.docs.map((doc) {
+                      return _buildCartItem(
+                        doc['imageUrl'],
+                        doc['name'],
+                        doc['description'],
+                        doc['rating'],
+                        doc['quantity'],
+                        doc['price'],
+                            (quantity) => updateQuantity(doc.id, quantity),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
-              _buildCartItem(
-                'assets/mon.webp',
-                'Dal Chawal Puri',
-                'Classic Indian food VEG',
-                4.2,
-                Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
-              ),
-              _buildCartItem(
-                'assets/tue.webp',
-                'Chana Masala Roti Rice',
-                'Freshly Indian food VEG',
-                4.8,
-               Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
-              ),
-              _buildCartItem(
-                'assets/wed.jpg',
-                'Aalu Roti Rice',
-                'Golden french Indian food VEG',
-                4.1,
-                Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
-              ),
-              _buildCartItem(
-                'assets/thu.jpg',
-                'Panner Roti Rice',
-                'Golden french Indian food VEG',
-                4.1,
-                Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
-              ),
-              _buildCartItem(
-                'assets/fri.jpg',
-                'Soyabin Roti Rice',
-                'Freshly french Indian food VEG',
-                4.1,
-                Quantity,
-                    (newQuantity) => setState(() => Quantity = newQuantity),
-              ),
-              SizedBox(height: 16),
               _buildSummary(subtotal),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
               _buildCheckoutButton(),
             ],
           ),
@@ -105,14 +93,14 @@ class _cardState extends State<card> {
   }
 
   Widget _buildCartItem(
-      String imageUrl, String name, String description, double rating, int quantity,
+      String imageUrl, String name, String description, double rating, int quantity, double price,
       ValueChanged<int> onQuantityChanged) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(imageUrl, width: 100, height: 100), // Adjust image size
+          Image.asset(imageUrl, width: 100, height: 100),
           SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -135,6 +123,10 @@ class _cardState extends State<card> {
                       style: TextStyle(fontSize: 14, color: Colors.orange),
                     ),
                   ],
+                ),
+                Text(
+                  '₹${price.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 14, color: Colors.black),
                 ),
               ],
             ),
@@ -174,11 +166,11 @@ class _cardState extends State<card> {
 
   Widget _buildSummary(double subtotal) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // Align items to the left
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSummaryRow('Subtotal', '\₹${subtotal.toStringAsFixed(2)}'),
-        _buildSummaryRow('Delivery Charges', '\₹0.00'),
-        _buildSummaryRow('Total Cost', '\₹${subtotal.toStringAsFixed(2)}', ),
+        _buildSummaryRow('Subtotal', '₹${subtotal.toStringAsFixed(2)}'),
+        _buildSummaryRow('Delivery Charges', '₹0.00'),
+        _buildSummaryRow('Total Cost', '₹${subtotal.toStringAsFixed(2)}', isTotal: true),
       ],
     );
   }
@@ -221,28 +213,6 @@ class _cardState extends State<card> {
       },
       child: Center(
         child: Text('Payment', style: TextStyle(fontSize: 16, color: Colors.white)),
-      ),
-    );
-  }
-}
-
-class SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool isTotal;
-
-  SummaryRow({required this.label, required this.value, this.isTotal = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(fontSize: 14, color: isTotal ? Colors.black : Colors.grey)),
-          Text(value, style: TextStyle(fontSize: isTotal ? 16 : 14, fontWeight: isTotal ? FontWeight.bold : FontWeight.normal, color: isTotal ? Colors.black : Colors.grey)),
-        ],
       ),
     );
   }

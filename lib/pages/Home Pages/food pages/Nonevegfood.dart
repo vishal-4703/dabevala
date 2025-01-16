@@ -103,61 +103,61 @@ class nonveg extends StatelessWidget {
                 children: [
                   vegItem(
                     name: 'ButterChicken',
-                    price: '₹ 60',
+                    price: '₹ 150',
                     rating: 4.1,
                     imageUrl: 'assets/butterchicken.png',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'butterchicken');
                       print('Allo selected');
                     },
                   ),
                   vegItem(
                     name: 'Fried Fish',
-                    price: '₹ 120',
+                    price: '₹ 130',
                     rating: 3.7,
                     imageUrl: 'assets/fried fish.jpeg',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'fish');
                       print('Panner selected');
                     },
                   ),
                   vegItem(
                     name: 'Chicken ',
-                    price: '₹ 120',
+                    price: '₹ 150',
                     rating: 4.9,
                     imageUrl: 'assets/chicken.png',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'chickennon');
                       print('Chana masala selected');
                     },
                   ),
                   vegItem(
                     name: 'Fish Curry',
-                    price: '₹ 90',
+                    price: '₹ 130',
                     rating: 4.9,
                     imageUrl: 'assets/fish curry.jpg',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'fishcurry');
                       print('dal selected');
                     },
                   ),
                   vegItem(
-                    name: 'Chicken Veg Noodles',
-                    price: '₹ 40',
+                    name: 'Chicken  Noodles',
+                    price: '₹ 130',
                     rating: 4.9,
                     imageUrl: 'assets/veg noodle.jpeg',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'chickennoodles');
                       print('selected');
                     },
                   ),
                   vegItem(
                     name: 'Fried Fish Bangda',
-                    price: '₹ 50',
+                    price: '₹ 100',
                     rating: 4.9,
                     imageUrl: 'assets/fried fish bangda.jpeg',
                     onSelected: () {
-                      Navigator.pushNamed(context, '');
+                      Navigator.pushNamed(context, 'bangda');
                       print(' selected');
                     },
                   ),

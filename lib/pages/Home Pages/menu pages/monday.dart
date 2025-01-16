@@ -66,7 +66,7 @@ class monday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              '\₹ 90',
+              '\₹ 120',
               style: TextStyle(
                 fontSize: 24,
                 color: Color(0xFF0223FA),

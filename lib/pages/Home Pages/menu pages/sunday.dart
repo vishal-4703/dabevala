@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class sunday extends StatelessWidget {
+  final DatabaseReference database = FirebaseDatabase.instance.ref();
+
+  void addToCart() {
+    database.child('cart').push().set({
+      'name': 'Shahi Paneer',
+      'price': 150,
+      'description': 'Shahi Paneer + Rice + Roti Full INDIAN Dish',
+      'quantity': 1,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +30,6 @@ class sunday extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Color(0xFF000000)),
             onPressed: () {
-              // Navigate to the Cart Page
               Navigator.pushNamed(context, 'card');
             },
           ),
@@ -33,7 +44,7 @@ class sunday extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black,
                     spreadRadius: 4,
                     blurRadius: 8,
                     offset: Offset(0, 4),
@@ -43,15 +54,15 @@ class sunday extends StatelessWidget {
               child: ClipOval(
                 child: Image.asset(
                   'assets/sun.jpg', // Path to your local image asset
-                  width: 400,
-                  height: 400,
+                  width: 300,
+                  height: 300,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             SizedBox(height: 20),
             Text(
-              'Shai Panner',
+              'Shahi Paneer',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -66,7 +77,7 @@ class sunday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              '\₹ 150',
+              '₹ 120',
               style: TextStyle(
                 fontSize: 24,
                 color: Color(0xFF0223FA),
@@ -74,7 +85,7 @@ class sunday extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Sahi panner + Rice + Roti Full INDIAN Dish ',
+              'Shahi Paneer + Rice + Roti Full INDIAN Dish',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -84,13 +95,12 @@ class sunday extends StatelessWidget {
             Spacer(),
             ElevatedButton(
               onPressed: () {
+                addToCart();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Added Shai Panner to cart!'),
+                    content: Text('Added Shahi Paneer to cart!'),
                   ),
                 );
-
-                // Navigate to the Cart Page
                 Navigator.pushNamed(context, 'card');
               },
               style: ElevatedButton.styleFrom(
@@ -101,27 +111,12 @@ class sunday extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Add Card',
+                'Add to Cart',
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// CartPage Widget (Example)
-class CartPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cart'),
-      ),
-      body: Center(
-        child: Text('Cart Page'),
       ),
     );
   }
