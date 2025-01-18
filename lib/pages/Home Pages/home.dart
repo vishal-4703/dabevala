@@ -117,7 +117,7 @@ class FoodGoHomePage extends StatelessWidget {
                       title: 'Veg Noodle',
                       description: 'Tasty lentil dish',
                       rating: 4.2,
-                      imageUrl: 'assets/vegnoodle.jpeg',
+                      imageUrl: 'assets/veg noodle.jpeg',
                       onPressed: () {
                         Navigator.pushNamed(context, 'vegnoodle');
                       },
