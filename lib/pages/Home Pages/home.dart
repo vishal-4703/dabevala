@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class FoodGoHomePage extends StatelessWidget {
   @override
@@ -14,7 +16,7 @@ class FoodGoHomePage extends StatelessWidget {
             },
             child: CircleAvatar(
               backgroundImage: AssetImage('assets/profile.jpg'),
-              radius: 40, // Adjusted radius for better fit
+              radius: 40,
             ),
           ),
         ],
@@ -25,10 +27,8 @@ class FoodGoHomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'A-143, Coba, Mumbai',
-                style: TextStyle(color: Colors.grey),
-              ),
+              // New UI Section
+              buildHeader(),
               SizedBox(height: 25),
               TextField(
                 decoration: InputDecoration(
@@ -45,60 +45,24 @@ class FoodGoHomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    OfferCard(
-                      discount: '10% OFF',
-                      description: 'Avail best discounts on your first order',
-                      color: Colors.lightBlueAccent,
-                      imageUrl: 'assets/indian2.jpeg',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'first');
-
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    OfferCard(
-                      discount: '15% OFF',
-                      description: 'Delicious meal discounts',
-                      color: Colors.pinkAccent.shade100,
-                      imageUrl: 'assets/indian6.jpeg',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'second');
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    OfferCard(
-                      discount: '20% OFF',
-                      description: 'Exclusive weekend offers',
-                      color: Colors.amberAccent,
-                      imageUrl: 'assets/indian3.jpeg',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'third');
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
+              buildCarouselSlider(context), // Call the carousel slider here
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Veg Button
-                 // Expanded(
-                    //child: CategoryButton(
-                     // label: 'Veg',
-                      //onSelected: (_) {
-                      //  Navigator.pushNamed(context, 'vegfoodpage');
-                     // },
-                   // ),
-                 // ),
-                  SizedBox(width: 10,height: 120, ), // Add spacing between buttons
+                  // Veg Button (commented out)
+                  // Expanded(
+                  //   child: CategoryButton(
+                  //     label: 'Veg',
+                  //     onSelected: (_) {
+                  //       Navigator.pushNamed(context, 'vegfoodpage');
+                  //     },
+                  //   ),
+                  // ),
+                  SizedBox(width: 10, height: 120), // Add spacing between buttons
                   // Non Veg Button
                   Expanded(
-                    flex: 2, // Increase the flex value to make this button wider
+                    flex: 2,
                     child: CategoryButton(
                       label: "Non Veg",
                       onSelected: (_) {
@@ -108,16 +72,10 @@ class FoodGoHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-
               SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Popular',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              Text(
+                'Popular',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
               SizedBox(
@@ -159,7 +117,7 @@ class FoodGoHomePage extends StatelessWidget {
                       title: 'Veg Noodle',
                       description: 'Tasty lentil dish',
                       rating: 4.2,
-                      imageUrl: 'assets/veg noodle.jpeg',
+                      imageUrl: 'assets/vegnoodle.jpeg',
                       onPressed: () {
                         Navigator.pushNamed(context, 'vegnoodle');
                       },
@@ -210,7 +168,6 @@ class FoodGoHomePage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-
         shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
         child: Row(
@@ -246,6 +203,90 @@ class FoodGoHomePage extends StatelessWidget {
       ),
     );
   }
+
+  Widget buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Welcome to DABBAWALA!',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 5),
+        Text(
+          'Your favorite meals delivered to your door.',
+          style: TextStyle(color: Colors.grey),
+        ),
+        SizedBox(height: 15),
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Current Location: A-143, Colaba, Mumbai',
+                style: TextStyle(color: Colors.white),
+              ),
+              Icon(Icons.location_on, color: Colors.white),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildCarouselSlider(BuildContext context) {
+    final List<Map<String, dynamic>> offers = [
+      {
+        'discount': '10% OFF',
+        'description': 'Avail best discounts on your first order',
+        'color': Colors.lightBlueAccent,
+        'imageUrl': 'assets/indian2.jpeg',
+        'route': 'first',
+      },
+      {
+        'discount': '15% OFF',
+        'description': 'Delicious meal discounts',
+        'color': Colors.pinkAccent.shade100,
+        'imageUrl': 'assets/indian6.jpeg',
+        'route': 'second',
+      },
+      {
+        'discount': '20% OFF',
+        'description': 'Exclusive weekend offers',
+        'color': Colors.amberAccent,
+        'imageUrl': 'assets/indian3.jpeg',
+        'route': 'third',
+      },
+    ];
+
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 200,
+        autoPlay: true,
+        enlargeCenterPage: true,
+      ),
+      items: offers.map((offer) {
+        return Builder(
+          builder: (BuildContext context) {
+            return OfferCard(
+              discount: offer['discount'],
+              description: offer['description'],
+              color: offer['color'],
+              imageUrl: offer['imageUrl'],
+              onPressed: () {
+                Navigator.pushNamed(context, offer['route']);
+              },
+            );
+          },
+        );
+      }).toList(),
+    );
+  }
 }
 
 class OfferCard extends StatelessWidget {
@@ -266,13 +307,10 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FirebaseAuth.instance.signOut();
-        Navigator.pushNamed(context, "/login");
-        showToast(message: "Successfully signed out");
-      },
-
+      onTap: onPressed,
       child: Container(
+        width: 300, // Fixed width for uniformity
+        height: 200, // Fixed height for uniformity
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color,
@@ -291,14 +329,14 @@ class OfferCard extends StatelessWidget {
               style: TextStyle(color: Colors.grey),
             ),
             SizedBox(height: 10),
-            Image.asset(imageUrl, height: 150, width: 200, fit: BoxFit.cover),
+            Expanded(
+              child: Image.asset(imageUrl, fit: BoxFit.cover),
+            ),
           ],
         ),
       ),
     );
   }
-
-  void showToast({required String message}) {}
 }
 
 class CategoryButton extends StatelessWidget {
