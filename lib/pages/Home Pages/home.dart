@@ -72,7 +72,7 @@ class FoodGoHomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 1),
               Text(
                 'Popular',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

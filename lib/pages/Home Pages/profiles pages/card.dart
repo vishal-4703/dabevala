@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_database/firebase_database.dart';
 
 class card extends StatefulWidget {
   @override
@@ -8,19 +7,22 @@ class card extends StatefulWidget {
 }
 
 class _cardState extends State<card> {
-  final CollectionReference cartItems =
-  FirebaseFirestore.instance.collection('cartItems');
+  final DatabaseReference cartItemsRef =
+  FirebaseDatabase.instance.ref().child('cartItems');
 
   double subtotal = 0.0;
 
   void calculateSubtotal() {
-    cartItems.get().then((querySnapshot) {
+    cartItemsRef.once().then((DatabaseEvent event) {
       double total = 0.0;
-      querySnapshot.docs.forEach((doc) {
-        int quantity = doc['quantity'];
-        double price = doc['price'];
-        total += quantity * price;
-      });
+      if (event.snapshot.value != null) {
+        Map<dynamic, dynamic> cartItems = event.snapshot.value as Map<dynamic, dynamic>;
+        cartItems.forEach((key, value) {
+          int quantity = value['quantity'];
+          double price = value['price'];
+          total += quantity * price;
+        });
+      }
       setState(() {
         subtotal = total;
       });
@@ -34,7 +36,7 @@ class _cardState extends State<card> {
   }
 
   Future<void> updateQuantity(String itemName, int quantity) async {
-    await cartItems.doc(itemName).update({'quantity': quantity});
+    await cartItemsRef.child(itemName).update({'quantity': quantity});
     calculateSubtotal();
   }
 
@@ -62,21 +64,27 @@ class _cardState extends State<card> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               StreamBuilder(
-                stream: cartItems.snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                stream: cartItemsRef.onValue,
+                builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                   if (!snapshot.hasData) {
                     return CircularProgressIndicator();
                   }
+                  if (snapshot.data!.snapshot.value == null) {
+                    return Text('No items in the cart.');
+                  }
+                  Map<dynamic, dynamic> cartItems = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
                   return Column(
-                    children: snapshot.data!.docs.map((doc) {
+                    children: cartItems.entries.map((entry) {
+                      String key = entry.key;
+                      Map<dynamic, dynamic> value = entry.value;
                       return _buildCartItem(
-                        doc['imageUrl'],
-                        doc['name'],
-                        doc['description'],
-                        doc['rating'],
-                        doc['quantity'],
-                        doc['price'],
-                            (quantity) => updateQuantity(doc.id, quantity),
+                        value['imageUrl'],
+                        value['name'],
+                        value['description'],
+                        value['rating'],
+                        value['quantity'],
+                        value['price'],
+                            (quantity) => updateQuantity(key, quantity),
                       );
                     }).toList(),
                   );
