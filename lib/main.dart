@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/AddMenuItemPage.dart';
+import 'screens/addmenu.dart';
 import 'screens/dashboard_screen.dart';
 import 'package:your_project_name/pages/food_list_page.dart';
 import 'package:your_project_name/pages/model/food_item.dart';
@@ -61,6 +62,7 @@ class MyApp extends StatelessWidget {
       home: login(),
       routes: {
         'AddMenuItemPage': (context) => AddMenuItemPage(),
+        'Menu': (context) => Menu(),
         'login': (context) => login( ),
         'DashboardScreen': (context) => DashboardScreen( ),
         'signup': (context) => signup(),
@@ -82,7 +84,7 @@ class MyApp extends StatelessWidget {
         'logout': (context) => logout(),
         'ProfilePage': (context) => ProfilePage(),
         'payment': (context) => payment(),
-        'card': (context) => card(),
+        'card': (context) => Card(),
         'restPage': (context) => restPage(),
         'updatepage': (context) => updatepage(),
         'chicken': (context) => chicken(),

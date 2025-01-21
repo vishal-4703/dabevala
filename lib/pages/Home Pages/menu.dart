@@ -1,6 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-class MenuPage extends StatelessWidget {
+class MenuPage extends StatefulWidget {
+  @override
+  _MenuPageState createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  int _selectedIndex = 0;
+  List<Map<String, dynamic>> _menuItems = [];
+  final DatabaseReference _database = FirebaseDatabase.instance.ref().child('MenuItems');
+  final DatabaseReference _cartItemsRef = FirebaseDatabase.instance.ref().child('CartItems');
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to changes in the 'MenuItems' node in the database
+    _database.onValue.listen((event) {
+      List<Map<String, dynamic>> newMenuItems = [];
+      final dataSnapshot = event.snapshot;
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        values.forEach((key, value) {
+          newMenuItems.add({
+            'key': key as String,
+            'itemName': value['itemName'] as String? ?? 'Default Item Name',
+            'day': value['day'] as String? ?? 'Unknown Day',
+            'price': value['price'] as String? ?? '0',
+            'assetImagePath': value['assetImagePath'] as String? ?? 'assets/default_image.png'
+          });
+        });
+      }
+      setState(() {
+        _menuItems = newMenuItems.cast<Map<String, dynamic>>();
+      });
+    });
+  }
+
+  void _onTabSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _addToCart(Map<String, dynamic> item) {
+    String key = _cartItemsRef.push().key ?? 'default_key'; // Generate a unique key for the new item
+    Map<String, dynamic> newCartItem = {
+      'name': item['itemName'],
+      'price': double.parse(item['price']),
+      'description': item['day'],
+      'quantity': 1, // Default quantity set to 1
+    };
+    _cartItemsRef.child(key).set(newCartItem).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Item added to cart')));
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add item to cart')));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +73,7 @@ class MenuPage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
-              Navigator.pushNamed(context, 'card');
+              Navigator.pushNamed(context, 'card'); // Specify the route to the cart screen
             },
           ),
           SizedBox(width: 15),
@@ -32,85 +89,44 @@ class MenuPage extends StatelessWidget {
                 children: [
                   TabItem(
                     title: 'Meals',
-                    isActive: true,
+                    isActive: _selectedIndex == 0,
                     onPressed: () {
-                      // Handle tab click
-                      print("Meals tab clicked");
+                      _onTabSelected(0);
                     },
                   ),
+                  // Add more TabItems here if necessary
                 ],
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height * 0.8, // Adjust height as needed
+              height: MediaQuery.of(context).size.height - 200, // Adjust this value as needed
               child: GridView.count(
                 crossAxisCount: 2,
                 padding: EdgeInsets.all(10),
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                children: [
-                  MenuItem(
-                    assetImagePath: 'assets/sun.jpg',
-                    title: 'Shai Panner',
-                    day: 'SUNDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'sunday');
+                children: _menuItems.map((item) {
+                  return MenuItem(
+                    title: item['itemName'],
+                    day: item['day'],
+                    price: item['price'],
+                    imagePath: item['assetImagePath'],
+                    onAddToCart: () {
+                      _addToCart(item);
                     },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/mon.webp',
-                    title: 'Dal Chawal Puri',
-                    day: 'MONDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'monday');
-                    },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/tue.webp',
-                    title: 'Chana Masala Roti Rice',
-                    day: 'TUESDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'tuesday');
-                    },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/wed.jpg',
-                    title: 'Aalu Roti Rice',
-                    day: 'WEDNESDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'wednesday');
-                    },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/thu.jpg',
-                    title: 'Panner Roti Rice',
-                    day: 'THURSDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'thursday');
-                    },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/fri.jpg',
-                    title: 'Soyabin Roti Rice',
-                    day: 'FRIDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'friday');
-                    },
-                  ),
-                  MenuItem(
-                    assetImagePath: 'assets/sat.jpg',
-                    title: 'Rajma Roti Rice',
-                    day: 'SATURDAY',
-                    onPressed: () {
-                      Navigator.pushNamed(context, 'saturday');
-                    },
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
             ),
           ],
         ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      // onPressed: () {
+      // Navigator.pushNamed(context, 'AddMenuItemPage');
+      //},
+      // child: Icon(Icons.add),
+      // ),
     );
   }
 }
@@ -151,53 +167,38 @@ class TabItem extends StatelessWidget {
 }
 
 class MenuItem extends StatelessWidget {
-  final String assetImagePath;
   final String title;
   final String day;
-  final VoidCallback onPressed;
+  final String price;
+  final String imagePath;
+  final VoidCallback onAddToCart;
 
-  MenuItem({
-    required this.assetImagePath,
-    required this.title,
-    required this.day,
-    required this.onPressed,
-  });
+  MenuItem({required this.title, required this.day, required this.price, required this.imagePath, required this.onAddToCart});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
+    return Card(
       child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(30),
-        ),
+        width: 150, // Adjust width as needed
+        height: 300, // Adjust height as needed
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage(assetImagePath),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            Image.asset(imagePath, fit: BoxFit.cover, height: 70), // Adjust height as needed
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), // Adjust font size as needed
+                  Text('Day: $day', style: TextStyle(fontSize: 12)), // Adjust font size as needed
+                  Text('Price: ₹$price', style: TextStyle(fontSize: 12)), // Adjust font size as needed
+                ],
               ),
             ),
-            SizedBox(height: 5),
-            Text(
-              day,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
+            IconButton(
+              icon: Icon(Icons.shopping_cart, size: 20), // Adjust icon size as needed
+              onPressed: onAddToCart,
             ),
           ],
         ),

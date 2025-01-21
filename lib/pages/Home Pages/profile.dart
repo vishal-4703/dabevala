@@ -1,5 +1,5 @@
+
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -37,22 +37,10 @@ class ProfilePage extends StatelessWidget {
                           backgroundImage: AssetImage('assets/profile.jpg'),
                         ),
                         SizedBox(height: 10),
-                        StreamBuilder<DocumentSnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection('users')
-                              .doc('user_id')  // Replace with the actual user ID
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return CircularProgressIndicator();
-                            }
-                            var userDocument = snapshot.data;
-                            return Text(
-                              userDocument!['username'],
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                            );
-                          },
+                        Text(
+                          'Vishal Shete',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -67,12 +55,8 @@ class ProfilePage extends StatelessWidget {
                     Navigator.pushNamed(context, 'restPage');
                   }),
                   buildMenuItem(
-                      context, Icons.shopping_cart, 'Shopping Cart', null, () {
+                      context, Icons.shopping_cart, 'shopping cart', null, () {
                     Navigator.pushNamed(context, 'card');
-                  }),
-                  buildMenuItem(
-                      context, Icons.directions_bike_outlined, 'Real Time Tracking', null, () {
-                    Navigator.pushNamed(context, 'realtime');
                   }),
                   buildMenuItem(
                       context, Icons.payment, 'Payment', null, () {
@@ -108,7 +92,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20), // Add spacing below the button if needed
         ],
       ),
     );

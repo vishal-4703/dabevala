@@ -1,237 +1,185 @@
 import 'package:flutter/material.dart';
+import 'cart_service.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-class card extends StatefulWidget {
+class Cart extends StatefulWidget {
   @override
-  _cardState createState() => _cardState();
+  _CartState createState() => _CartState();
 }
 
-class _cardState extends State<card> {
-  final DatabaseReference cartItemsRef = FirebaseDatabase.instance.ref().child('cartItems');
-  double subtotal = 0.0;
+class _CartState extends State<Cart> {
+  final CartService _cartService = CartService();
+  double _totalPrice = 0.0;
 
-  void calculateSubtotal() {
-    cartItemsRef.once().then((DatabaseEvent event) {
-      double total = 0.0;
-      if (event.snapshot.value != null) {
-        Map<dynamic, dynamic> cartItems = event.snapshot.value as Map<dynamic, dynamic>;
-        cartItems.forEach((key, value) {
-          int quantity = value['quantity'];
-          double price = value['price'];
-          total += quantity * price;
-        });
-      }
-      setState(() {
-        subtotal = total;
-      });
+  void _addItem() {
+    try {
+      String id = DateTime.now().millisecondsSinceEpoch.toString();
+      String name = 'Item ${id.substring(id.length - 4)}';
+      double price = 10.0;
+      String day = 'Monday';
+      String imagePath = 'assets/images/sample.png';
+
+      _cartService.addItemToCart(id, name, day, imagePath, price);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to add item: $e'),
+      ));
+    }
+  }
+
+  void _calculateTotalPrice(Map<String, dynamic> cartData) {
+    double total = 0.0;
+    cartData.forEach((key, value) {
+      total += value['price'];
+    });
+    setState(() {
+      _totalPrice = total;
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    calculateSubtotal();
+  void _updateItem(String id, String newName, double newPrice, String newDay, String newImagePath) {
+    try {
+      _cartService.updateCartItem(id, newName, newPrice, newDay, newImagePath);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to update item: $e'),
+      ));
+    }
   }
 
-  Future<void> addItemToCart(String itemName, double price, String description, int quantity) async {
-    await cartItemsRef.child(itemName).set({
-      'name': itemName,
-      'price': price,
-      'description': description,
-      'quantity': quantity,
-    });
-    calculateSubtotal();
+  void _deleteItem(String id) {
+    try {
+      _cartService.deleteCartItem(id);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to delete item: $e'),
+      ));
+    }
   }
 
-  Future<void> updateQuantity(String itemName, int quantity) async {
-    await cartItemsRef.child(itemName).update({'quantity': quantity});
-    calculateSubtotal();
-  }
+  void _showEditDialog(String id, Map<String, dynamic> currentItem) {
+    TextEditingController nameController = TextEditingController(text: currentItem['itemName']);
+    TextEditingController priceController = TextEditingController(text: currentItem['price'].toString());
+    TextEditingController dayController = TextEditingController(text: currentItem['day']);
+    TextEditingController imagePathController = TextEditingController(text: currentItem['assetImagePath']);
 
-  Future<void> deleteItemFromCart(String itemName) async {
-    await cartItemsRef.child(itemName).remove();
-    calculateSubtotal();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit Item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: dayController,
+                decoration: InputDecoration(labelText: 'Day'),
+              ),
+              TextField(
+                controller: imagePathController,
+                decoration: InputDecoration(labelText: 'Image Path'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _updateItem(
+                  id,
+                  nameController.text,
+                  double.parse(priceController.text),
+                  dayController.text,
+                  imagePathController.text,
+                );
+                Navigator.of(context).pop();
+              },
+              child: Text('Update'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Navigator.pushNamed(context, 'ProfilePage');
-          },
-        ),
-        title: Text(
-          'Shopping Cart',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: Text('Cart Page'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              StreamBuilder(
-                stream: cartItemsRef.onValue,
-                builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                  if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
-                  }
-                  if (snapshot.data!.snapshot.value == null) {
-                    return Text('No items in the cart.');
-                  }
-                  Map<dynamic, dynamic> cartItems = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-                  return Column(
-                    children: cartItems.entries.map((entry) {
-                      String key = entry.key;
-                      Map<dynamic, dynamic> value = entry.value;
-                      return _buildCartItem(
-                        value['name'],
-                        value['description'],
-                        value['quantity'],
-                        value['price'],
-                            (quantity) => updateQuantity(key, quantity),
-                            () => deleteItemFromCart(key),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-              _buildSummary(subtotal),
-              SizedBox(height: 20),
-              _buildCheckoutButton(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCartItem(
-      String name,
-      String description,
-      int quantity,
-      double price,
-      ValueChanged<int> onQuantityChanged,
-      VoidCallback onDelete,
-      ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                Text(
-                  '₹${price.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8),
-          _buildQuantitySelector(quantity, onQuantityChanged),
-          IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
-            onPressed: onDelete,
+          StreamBuilder<DatabaseEvent>(
+            stream: _cartService.cartStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                Map<String, dynamic>? data = (snapshot.data!.snapshot.value as Map?)?.cast<String, dynamic>();
+
+                if (data == null) {
+                  return Center(child: Text('No items in the cart'));
+                }
+
+                _calculateTotalPrice(data);
+
+                return Column(
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        String key = data.keys.elementAt(index);
+                        Map<String, dynamic> item = Map<String, dynamic>.from(data[key]);
+                        return ListTile(
+                          title: Text(item['itemName']),
+                          subtitle: Text('Price: ${item['price']} - Day: ${item['day']}'),
+                          leading: Image.asset(item['assetImagePath']),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () => _showEditDialog(key, item),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () => _deleteItem(key),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    Text('Total Price: ₹$_totalPrice'),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _addItem,
+                      child: Text('Add Item'),
+                    ),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error loading data'));
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuantitySelector(int quantity, ValueChanged<int> onQuantityChanged) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(Icons.remove, color: Colors.grey),
-          onPressed: () {
-            if (quantity > 1) {
-              onQuantityChanged(quantity - 1);
-            }
-          },
-        ),
-        Text(
-          quantity.toString().padLeft(2, '0'),
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        IconButton(
-          icon: Icon(Icons.add, color: Colors.grey),
-          onPressed: () {
-            onQuantityChanged(quantity + 1);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummary(double subtotal) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSummaryRow('Subtotal', '₹${subtotal.toStringAsFixed(2)}'),
-        _buildSummaryRow('Delivery Charges', '₹0.00'),
-        _buildSummaryRow('Total Cost', '₹${subtotal.toStringAsFixed(2)}', isTotal: true),
-      ],
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: isTotal ? Colors.black : Colors.grey,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: isTotal ? 16 : 14,
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? Colors.black : Colors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCheckoutButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange,
-        padding: EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-        ),
-      ),
-      onPressed: () {
-        Navigator.pushNamed(context, 'payment');
-      },
-      child: Center(
-        child: Text('Payment', style: TextStyle(fontSize: 16, color: Colors.white)),
       ),
     );
   }
