@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:your_project_name/pages/login%20pages/login.dart';
+import 'addmenu.dart';
 import 'dabbawala_list_screen.dart';
 import 'order_list_screen.dart';
 import 'customer_list_screen.dart';
@@ -77,6 +78,18 @@ class DashboardScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => CustomerListScreen()),
+                    );
+                  },
+                ),
+                SizedBox(height: 20),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.fastfood, size: 24),
+                  label: Text('Food List', style: TextStyle(fontSize: 18)),
+                  style: buttonStyle,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Menu()),
                     );
                   },
                 ),

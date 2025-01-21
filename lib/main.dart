@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/dashboard_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'screens/AddMenuItemPage.dart';
+import 'screens/dashboard_screen.dart';
 import 'package:your_project_name/pages/food_list_page.dart';
 import 'package:your_project_name/pages/model/food_item.dart';
 import 'pages/Home Pages/food pages/food iteam page/bangda.dart';
@@ -44,9 +45,12 @@ import 'pages/Home Pages/menu pages/thursday.dart';
 import 'pages/Home Pages/menu pages/friday.dart';
 import 'pages/Home Pages/menu pages/saturday.dart';
 
-void main() async { WidgetsFlutterBinding.ensureInitialized();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp()); }
+  runApp(MyApp());
+}
+
 
 class MyApp extends StatelessWidget {
   @override Widget build(BuildContext context)
@@ -56,6 +60,7 @@ class MyApp extends StatelessWidget {
       primarySwatch: Colors.blue, ),
       home: login(),
       routes: {
+        'AddMenuItemPage': (context) => AddMenuItemPage(),
         'login': (context) => login( ),
         'DashboardScreen': (context) => DashboardScreen( ),
         'signup': (context) => signup(),
@@ -71,7 +76,7 @@ class MyApp extends StatelessWidget {
         'chickennoodles': (context) => chickennoodles(),
         'fishcurry': (context) => fishcurry(),
         'chickennon': (context) => chickennon(),
-        'FoodGoHomePage': (context) => FoodGoHomePage(),
+       'FoodGoHomePage': (context) => FoodGoHomePage(),
         'sub': (context) => sub(),
         'MenuPage': (context) => MenuPage(),
         'logout': (context) => logout(),

@@ -7,9 +7,7 @@ class card extends StatefulWidget {
 }
 
 class _cardState extends State<card> {
-  final DatabaseReference cartItemsRef =
-  FirebaseDatabase.instance.ref().child('cartItems');
-
+  final DatabaseReference cartItemsRef = FirebaseDatabase.instance.ref().child('cartItems');
   double subtotal = 0.0;
 
   void calculateSubtotal() {
@@ -35,8 +33,23 @@ class _cardState extends State<card> {
     calculateSubtotal();
   }
 
+  Future<void> addItemToCart(String itemName, double price, String description, int quantity) async {
+    await cartItemsRef.child(itemName).set({
+      'name': itemName,
+      'price': price,
+      'description': description,
+      'quantity': quantity,
+    });
+    calculateSubtotal();
+  }
+
   Future<void> updateQuantity(String itemName, int quantity) async {
     await cartItemsRef.child(itemName).update({'quantity': quantity});
+    calculateSubtotal();
+  }
+
+  Future<void> deleteItemFromCart(String itemName) async {
+    await cartItemsRef.child(itemName).remove();
     calculateSubtotal();
   }
 
@@ -78,13 +91,12 @@ class _cardState extends State<card> {
                       String key = entry.key;
                       Map<dynamic, dynamic> value = entry.value;
                       return _buildCartItem(
-                        value['imageUrl'],
                         value['name'],
                         value['description'],
-                        value['rating'],
                         value['quantity'],
                         value['price'],
                             (quantity) => updateQuantity(key, quantity),
+                            () => deleteItemFromCart(key),
                       );
                     }).toList(),
                   );
@@ -101,15 +113,18 @@ class _cardState extends State<card> {
   }
 
   Widget _buildCartItem(
-      String imageUrl, String name, String description, double rating, int quantity, double price,
-      ValueChanged<int> onQuantityChanged) {
+      String name,
+      String description,
+      int quantity,
+      double price,
+      ValueChanged<int> onQuantityChanged,
+      VoidCallback onDelete,
+      ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(imageUrl, width: 100, height: 100),
-          SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,16 +137,6 @@ class _cardState extends State<card> {
                   description,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.orange, size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      rating.toString(),
-                      style: TextStyle(fontSize: 14, color: Colors.orange),
-                    ),
-                  ],
-                ),
                 Text(
                   '₹${price.toStringAsFixed(2)}',
                   style: TextStyle(fontSize: 14, color: Colors.black),
@@ -141,6 +146,10 @@ class _cardState extends State<card> {
           ),
           SizedBox(width: 8),
           _buildQuantitySelector(quantity, onQuantityChanged),
+          IconButton(
+            icon: Icon(Icons.delete, color: Colors.red),
+            onPressed: onDelete,
+          ),
         ],
       ),
     );
@@ -192,7 +201,9 @@ class _cardState extends State<card> {
           Text(
             label,
             style: TextStyle(
-                fontSize: 14, color: isTotal ? Colors.black : Colors.grey),
+              fontSize: 14,
+              color: isTotal ? Colors.black : Colors.grey,
+            ),
           ),
           Text(
             value,

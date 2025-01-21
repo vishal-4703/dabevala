@@ -22,91 +22,94 @@ class MenuPage extends StatelessWidget {
           SizedBox(width: 15),
         ],
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 50,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                TabItem(
-                  title: 'Meals',
-                  isActive: true,
-                  onPressed: () {
-                    // Handle tab click
-                    print("Meals tab clicked");
-                  },
-                ),
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TabItem(
+                    title: 'Meals',
+                    isActive: true,
+                    onPressed: () {
+                      // Handle tab click
+                      print("Meals tab clicked");
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: EdgeInsets.all(10),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              children: [
-                MenuItem(
-                  assetImagePath: 'assets/sun.jpg',
-                  title: 'Shai Panner',
-                  day: 'SUNDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'sunday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/mon.webp',
-                  title: 'Dal Chawal Puri',
-                  day: 'MONDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'monday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/tue.webp',
-                  title: 'Chana Masala Roti Rice',
-                  day: 'TUESDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'tuesday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/wed.jpg',
-                  title: 'Aalu Roti Rice',
-                  day: 'WEDNESDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'wednesday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/thu.jpg',
-                  title: 'Panner Roti Rice',
-                  day: 'THURSDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'thursday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/fri.jpg',
-                  title: 'Soyabin Roti Rice',
-                  day: 'FRIDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'friday');
-                  },
-                ),
-                MenuItem(
-                  assetImagePath: 'assets/sat.jpg',
-                  title: 'Rajma Roti Rice',
-                  day: 'SATURDAY',
-                  onPressed: () {
-                    Navigator.pushNamed(context,'saturday');
-                  },
-                ),
-              ],
+            Container(
+              height: MediaQuery.of(context).size.height * 0.8, // Adjust height as needed
+              child: GridView.count(
+                crossAxisCount: 2,
+                padding: EdgeInsets.all(10),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                children: [
+                  MenuItem(
+                    assetImagePath: 'assets/sun.jpg',
+                    title: 'Shai Panner',
+                    day: 'SUNDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'sunday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/mon.webp',
+                    title: 'Dal Chawal Puri',
+                    day: 'MONDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'monday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/tue.webp',
+                    title: 'Chana Masala Roti Rice',
+                    day: 'TUESDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'tuesday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/wed.jpg',
+                    title: 'Aalu Roti Rice',
+                    day: 'WEDNESDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'wednesday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/thu.jpg',
+                    title: 'Panner Roti Rice',
+                    day: 'THURSDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'thursday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/fri.jpg',
+                    title: 'Soyabin Roti Rice',
+                    day: 'FRIDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'friday');
+                    },
+                  ),
+                  MenuItem(
+                    assetImagePath: 'assets/sat.jpg',
+                    title: 'Rajma Roti Rice',
+                    day: 'SATURDAY',
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'saturday');
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
