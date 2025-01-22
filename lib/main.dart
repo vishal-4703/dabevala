@@ -27,7 +27,6 @@ import 'pages/Home Pages/profile.dart';
 import 'pages/Home Pages/profiles pages/passwordupdate.dart';
 import 'pages/Home Pages/profiles pages/updatenext.dart';
 import 'pages/Home Pages/profiles pages/payment.dart';
-import 'pages/Home Pages/profiles pages/card.dart';
 import 'pages/Home Pages/subscription.dart';
 import 'pages/Home Pages/food pages/vegfood.dart';
 import 'pages/Home Pages/food pages/Nonevegfood.dart';
@@ -84,7 +83,6 @@ class MyApp extends StatelessWidget {
         'logout': (context) => logout(),
         'ProfilePage': (context) => ProfilePage(),
         'payment': (context) => payment(),
-        'card': (context) => Card(),
         'restPage': (context) => restPage(),
         'updatepage': (context) => updatepage(),
         'chicken': (context) => chicken(),
