@@ -1,5 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Menu and Cart',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MenuPage(),
+      routes: {
+        'payment': (context) => PaymentPage(),
+      },
+    );
+  }
+}
 
 class MenuPage extends StatefulWidget {
   @override
@@ -11,6 +34,7 @@ class _MenuPageState extends State<MenuPage> {
   List<Map<String, dynamic>> _menuItems = [];
   List<Map<String, dynamic>> _cartItems = [];
   final DatabaseReference _database = FirebaseDatabase.instance.ref().child('MenuItems');
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -32,6 +56,7 @@ class _MenuPageState extends State<MenuPage> {
       }
       setState(() {
         _menuItems = newMenuItems;
+        _isLoading = false;
       });
     });
   }
@@ -69,7 +94,6 @@ class _MenuPageState extends State<MenuPage> {
                   builder: (context) => CartPage(
                     cartItems: _cartItems,
                     onRemoveFromCart: _removeFromCart,
-                    databaseReference: FirebaseDatabase.instance.ref().child('CartItems'), // Pass the database reference
                   ),
                 ),
               );
@@ -78,7 +102,9 @@ class _MenuPageState extends State<MenuPage> {
           SizedBox(width: 15),
         ],
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -241,6 +267,16 @@ class NextPage extends StatelessWidget {
     required this.cartItems,
   });
 
+  final DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('User  Cart'); // Reference to User Cart
+
+  void addCartItemToDatabase(Map<String, dynamic> cartItem) {
+    cartRef.push().set(cartItem).then((_) {
+      print("Cart item added successfully.");
+    }).catchError((error) {
+      print("Failed to add cart item: $error");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -263,8 +299,7 @@ class NextPage extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => CartPage(
                     cartItems: cartItems,
-                    onRemoveFromCart: (item) {}, // Placeholder
-                    databaseReference: FirebaseDatabase.instance.ref().child('CartItems'), // Pass the database reference
+                    onRemoveFromCart: (item) {},
                   ),
                 ),
               );
@@ -360,6 +395,7 @@ class NextPage extends StatelessWidget {
                 };
 
                 onAddToCart(newCartItem);
+                addCartItemToDatabase(newCartItem); // Add to database
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -367,14 +403,12 @@ class NextPage extends StatelessWidget {
                   ),
                 );
 
-                // Navigate to CartPage after adding to cart
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => CartPage(
                       cartItems: cartItems,
-                      onRemoveFromCart: (item) {}, // Placeholder
-                      databaseReference: FirebaseDatabase.instance.ref().child('CartItems'), // Pass the database reference
+                      onRemoveFromCart: (item) {},
                     ),
                   ),
                 );
@@ -398,21 +432,53 @@ class NextPage extends StatelessWidget {
   }
 }
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
   final Function(Map<String, dynamic>) onRemoveFromCart;
-  final DatabaseReference databaseReference; // Add this
 
   CartPage({
     required this.cartItems,
     required this.onRemoveFromCart,
-    required this.databaseReference, // Add this
   });
+
+  @override
+  _CartPageState createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('User  Cart'); // Reference to User Cart
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch cart items from Firebase
+    databaseReference.onValue.listen((event) {
+      List<Map<String, dynamic>> fetchedCartItems = [];
+      final dataSnapshot = event.snapshot;
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        values.forEach((key, value) {
+          fetchedCartItems.add({
+            'id': key,
+            'name': value['name'],
+            'price': value['price'],
+            'day': value['day'],
+            'imagePath': value['imagePath'],
+            'description': value['description'],
+          });
+        });
+      }
+      setState(() {
+        widget.cartItems.clear();
+        widget.cartItems.addAll(fetchedCartItems);
+      });
+    });
+  }
 
   double calculateTotal() {
     double total = 0.0;
-    for (var item in cartItems) {
-      total += double.tryParse(item['price']) ?? 0.0; // Ensure price is parsed as double
+    for (var item in widget.cartItems) {
+      total += double.tryParse(item['price']) ?? 0.0;
     }
     return total;
   }
@@ -429,9 +495,9 @@ class CartPage extends StatelessWidget {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: cartItems.length,
+              itemCount: widget.cartItems.length,
               itemBuilder: (context, index) {
-                final item = cartItems[index];
+                final item = widget.cartItems[index];
                 return ListTile(
                   leading: Image.asset(item['imagePath'], width: 50, height: 50),
                   title: Text(item['name']),
@@ -439,10 +505,7 @@ class CartPage extends StatelessWidget {
                   trailing: IconButton(
                     icon: Icon(Icons.delete, color: Colors.red),
                     onPressed: () {
-                      // Call the function to remove the item from the cart
-                      onRemoveFromCart(item);
-                      // Call the function to delete the item from the database
-                      deleteItemFromDatabase(item['id']);
+                      _removeFromCart(item);
                     },
                   ),
                 );
@@ -460,7 +523,7 @@ class CartPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, 'payment'); // Navigate to Payment Page
+                Navigator.pushNamed(context, 'payment');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF0333F4),
@@ -480,8 +543,17 @@ class CartPage extends StatelessWidget {
     );
   }
 
+  void _removeFromCart(Map<String, dynamic> item) {
+    setState(() {
+      widget.cartItems.remove(item);
+    });
+    deleteItemFromDatabase(item['id']); // Use the unique ID to delete from the database
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${item['name']} removed from cart')),
+    );
+  }
+
   void deleteItemFromDatabase(String itemId) {
-    // Assuming you have a reference to the database
     databaseReference.child(itemId).remove().then((_) {
       print("Item deleted successfully.");
     }).catchError((error) {

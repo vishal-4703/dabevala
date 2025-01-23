@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -49,15 +48,6 @@ class FoodGoHomePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Veg Button (commented out)
-                  // Expanded(
-                  //   child: CategoryButton(
-                  //     label: 'Veg',
-                  //     onSelected: (_) {
-                  //       Navigator.pushNamed(context, 'vegfoodpage');
-                  //     },
-                  //   ),
-                  // ),
                   SizedBox(width: 10, height: 120), // Add spacing between buttons
                   // Non Veg Button
                   Expanded(

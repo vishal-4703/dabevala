@@ -28,7 +28,6 @@ import 'pages/Home Pages/profiles pages/passwordupdate.dart';
 import 'pages/Home Pages/profiles pages/updatenext.dart';
 import 'pages/Home Pages/profiles pages/payment.dart';
 import 'pages/Home Pages/subscription.dart';
-import 'pages/Home Pages/food pages/vegfood.dart';
 import 'pages/Home Pages/food pages/Nonevegfood.dart';
 import 'pages/Home Pages/food pages/food iteam page/chicken.dart';
 import 'pages/Home Pages/food pages/food iteam page/vegnoodle.dart';
@@ -36,14 +35,6 @@ import 'pages/Home Pages/food pages/food iteam page/panner.dart';
 import 'pages/Home Pages/food pages/food iteam page/sahipanner.dart';
 import 'pages/Home Pages/food pages/food iteam page/dalmasala.dart';
 import 'pages/Home Pages/food pages/food iteam page/biryani.dart';
-import 'pages/Home Pages/food pages/food iteam page/Aloo.dart';
-import 'pages/Home Pages/menu pages/sunday.dart';
-import 'pages/Home Pages/menu pages/monday.dart';
-import 'pages/Home Pages/menu pages/tuesday.dart';
-import 'pages/Home Pages/menu pages/wednesday.dart';
-import 'pages/Home Pages/menu pages/thursday.dart';
-import 'pages/Home Pages/menu pages/friday.dart';
-import 'pages/Home Pages/menu pages/saturday.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +60,6 @@ class MyApp extends StatelessWidget {
         'forgetpassword2': (context) => forgetpassword2(),
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
         'FoodItemScreen': (context)=> FoodListPage(),
-        'vegfoodpage': (context) => vegfoodpage(),
         'nonveg': (context) => nonveg(),
         'butterchicken': (context) => butterchicken(),
         'fish': (context) => fish(),
@@ -91,14 +81,6 @@ class MyApp extends StatelessWidget {
         'sahipanner': (context) => sahipanner(),
         'dal': (context) => dal(),
         'biryani': (context) => biryani(),
-        'aloopage': (context) => aloopage(),
-        'sunday': (context) => sunday(),
-        'monday': (context) => monday(),
-        'tuesday': (context) => tuesday(),
-        'wednesday': (context) => wednesday(),
-        'thursday': (context) => thursday(),
-        'friday': (context) => friday(),
-        'saturday': (context) => saturday(),
         'first': (context) => first(),
         'second': (context) => second(),
         'third': (context) => third(),
