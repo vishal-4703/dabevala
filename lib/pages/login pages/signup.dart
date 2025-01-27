@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import '../usee_AUTH/firebase_auth_implemenation/firebase_auth_service.dart';
+
 
 class signup extends StatefulWidget {
   @override
-  _signupState createState() => _signupState();
+  _SignupState createState() => _SignupState();
 }
 
-class _signupState extends State<signup> {
+class _SignupState extends State<signup> {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   final TextEditingController _usernameController = TextEditingController();
@@ -15,6 +18,7 @@ class _signupState extends State<signup> {
   bool _passwordVisible = false;
 
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -26,19 +30,39 @@ class _signupState extends State<signup> {
 
   void _signUp() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       String username = _usernameController.text.trim();
       String email = _emailController.text.trim();
       String password = _passwordController.text.trim();
 
-      User? user = await _auth.signUpWithEmail(email, password);
+      User? user = await _auth.signUpWithEmailAndPassword(email, password);
+      setState(() {
+        _isLoading = false;
+      });
+
       if (user != null) {
+        // Store user data in Realtime Database
+        DatabaseReference userRef = FirebaseDatabase.instance.ref("users/${user.uid}");
+        await userRef.set({
+          'username': username,
+          'email': email,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+
         Navigator.pushNamed(context, 'login');
-        print("User signed up successfully");
+        print("User  signed up and data stored successfully");
       } else {
-        print("Sign-up failed");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Sign-up failed")),
+        );
       }
     } else {
-      print("Please fill in all fields correctly");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill in all fields correctly")),
+      );
     }
   }
 
@@ -77,7 +101,7 @@ class _signupState extends State<signup> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: EdgeInsets.only(left: 35, right: 35),
+                        margin: EdgeInsets.symmetric(horizontal: 35),
                         child: Column(
                           children: [
                             TextFormField(
@@ -86,15 +110,11 @@ class _signupState extends State<signup> {
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.white,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.black,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.black),
                                 ),
                                 hintText: "Name",
                                 hintStyle: TextStyle(color: Colors.white),
@@ -109,24 +129,18 @@ class _signupState extends State<signup> {
                                 return null;
                               },
                             ),
-                            SizedBox(
-                              height: 30,
-                            ),
+                            SizedBox(height: 30),
                             TextFormField(
                               controller: _emailController,
                               style: TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.white,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.black,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.black),
                                 ),
                                 hintText: "Email",
                                 hintStyle: TextStyle(color: Colors.white),
@@ -144,9 +158,7 @@ class _signupState extends State<signup> {
                                 return null;
                               },
                             ),
-                            SizedBox(
-                              height: 30,
-                            ),
+                            SizedBox(height: 30),
                             TextFormField(
                               controller: _passwordController,
                               style: TextStyle(color: Colors.white),
@@ -154,15 +166,11 @@ class _signupState extends State<signup> {
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.white,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.white),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(
-                                    color: Colors.black,
-                                  ),
+                                  borderSide: BorderSide(color: Colors.black),
                                 ),
                                 hintText: "Password",
                                 hintStyle: TextStyle(color: Colors.white),
@@ -191,9 +199,7 @@ class _signupState extends State<signup> {
                                 return null;
                               },
                             ),
-                            SizedBox(
-                              height: 40,
-                            ),
+                            SizedBox(height: 40),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -210,17 +216,15 @@ class _signupState extends State<signup> {
                                   backgroundColor: Color(0xff4c505b),
                                   child: IconButton(
                                     color: Colors.white,
-                                    onPressed: _signUp,
-                                    icon: Icon(
-                                      Icons.arrow_forward,
-                                    ),
+                                    onPressed: _isLoading ? null : _signUp,
+                                    icon: _isLoading
+                                        ? CircularProgressIndicator(color: Colors.white)
+                                        : Icon(Icons.arrow_forward),
                                   ),
                                 )
                               ],
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -253,21 +257,4 @@ class _signupState extends State<signup> {
       ),
     );
   }
-}
-
-class FirebaseAuthService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  Future<User?> signUpWithEmail(String email, String password) async {
-    try {
-      UserCredential result = await _firebaseAuth.createUserWithEmailAndPassword(
-          email: email, password: password);
-      return result.user;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-// Add other methods like sign-in, sign-out as needed.
 }

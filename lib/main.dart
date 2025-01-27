@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
         'forgetpassword': (context) => forgetpassword(),
         'forgetpassword2': (context) => forgetpassword2(),
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
-        'FoodItemScreen': (context) => FoodListPage(),
+        //'FoodItemScreen': (context) => FoodListPage(),
         'nonveg': (context) => nonveg(),
         'butterchicken': (context) => butterchicken(),
         'fish': (context) => fish(),
