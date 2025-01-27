@@ -267,7 +267,7 @@ class NextPage extends StatelessWidget {
     required this.cartItems,
   });
 
-  final DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('User  Cart'); // Reference to User Cart
+  final DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('User   Cart'); // Reference to User Cart
 
   void addCartItemToDatabase(Map<String, dynamic> cartItem) {
     cartRef.push().set(cartItem).then((_) {
@@ -446,41 +446,11 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('User  Cart'); // Reference to User Cart
-
-  @override
-  void initState() {
-    super.initState();
-    // Fetch cart items from Firebase
-    databaseReference.onValue.listen((event) {
-      List<Map<String, dynamic>> fetchedCartItems = [];
-      final dataSnapshot = event.snapshot;
-      if (dataSnapshot.value != null) {
-        Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
-        values.forEach((key, value) {
-          fetchedCartItems.add({
-            'id': key,
-            'name': value['name'],
-            'price': value['price'],
-            'day': value['day'],
-            'imagePath': value['imagePath'],
-            'description': value['description'],
-          });
-        });
-      }
-      setState(() {
-        widget.cartItems.clear();
-        widget.cartItems.addAll(fetchedCartItems);
-      });
-    });
-  }
-
   double calculateTotal() {
-    double total = 0.0;
-    for (var item in widget.cartItems) {
-      total += double.tryParse(item['price']) ?? 0.0;
-    }
-    return total;
+    return widget.cartItems.fold(0.0, (total, item) {
+      double itemPrice = double.tryParse(item['price']) ?? 0.0; // Ensure non-nullable
+      return total + itemPrice; // Add the item price to the total
+    });
   }
 
   @override
@@ -498,15 +468,18 @@ class _CartPageState extends State<CartPage> {
               itemCount: widget.cartItems.length,
               itemBuilder: (context, index) {
                 final item = widget.cartItems[index];
-                return ListTile(
-                  leading: Image.asset(item['imagePath'], width: 50, height: 50),
-                  title: Text(item['name']),
-                  subtitle: Text('Day: ${item['day']}\nPrice: ₹${item['price']}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      _removeFromCart(item);
-                    },
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  child: ListTile(
+                    leading: Image.asset(item['imagePath'], width: 70, height: 70),
+                    title: Text(item['name'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    subtitle: Text('Day: ${item['day']}\nPrice: ₹${item['price']}', style: TextStyle(fontSize: 14)),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        _removeFromCart(item);
+                      },
+                    ),
                   ),
                 );
               },
@@ -516,7 +489,7 @@ class _CartPageState extends State<CartPage> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Total: ₹$totalAmount',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
             ),
           ),
           Padding(
@@ -547,18 +520,10 @@ class _CartPageState extends State<CartPage> {
     setState(() {
       widget.cartItems.remove(item);
     });
-    deleteItemFromDatabase(item['id']); // Use the unique ID to delete from the database
+    widget.onRemoveFromCart(item);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${item['name']} removed from cart')),
     );
-  }
-
-  void deleteItemFromDatabase(String itemId) {
-    databaseReference.child(itemId).remove().then((_) {
-      print("Item deleted successfully.");
-    }).catchError((error) {
-      print("Failed to delete item: $error");
-    });
   }
 }
 

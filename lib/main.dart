@@ -42,7 +42,6 @@ void main() async {
   runApp(MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   @override Widget build(BuildContext context)
   {
@@ -53,13 +52,13 @@ class MyApp extends StatelessWidget {
       routes: {
         'AddMenuItemPage': (context) => AddMenuItemPage(),
         'Menu': (context) => Menu(),
-        'login': (context) => login( ),
-        'DashboardScreen': (context) => DashboardScreen( ),
+        'login': (context) => login(),
+        'DashboardScreen': (context) => DashboardScreen(),
         'signup': (context) => signup(),
         'forgetpassword': (context) => forgetpassword(),
         'forgetpassword2': (context) => forgetpassword2(),
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
-        'FoodItemScreen': (context)=> FoodListPage(),
+        'FoodItemScreen': (context) => FoodListPage(),
         'nonveg': (context) => nonveg(),
         'butterchicken': (context) => butterchicken(),
         'fish': (context) => fish(),
@@ -67,7 +66,7 @@ class MyApp extends StatelessWidget {
         'chickennoodles': (context) => chickennoodles(),
         'fishcurry': (context) => fishcurry(),
         'chickennon': (context) => chickennon(),
-       'FoodGoHomePage': (context) => FoodGoHomePage(),
+        'FoodGoHomePage': (context) => FoodGoHomePage(),
         'sub': (context) => sub(),
         'MenuPage': (context) => MenuPage(),
         'logout': (context) => logout(),
@@ -85,20 +84,8 @@ class MyApp extends StatelessWidget {
         'second': (context) => second(),
         'third': (context) => third(),
         'realtime': (context) => realtime(),
-
-
       },
       debugShowCheckedModeBanner: false,
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
