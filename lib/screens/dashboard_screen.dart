@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:your_project_name/pages/login%20pages/login.dart';
-import 'addmenu.dart';
-import 'dabbawala_list_screen.dart';
-import 'order_list_screen.dart';
-import 'customer_list_screen.dart';
+import 'package:your_project_name/pages/login%20pages/login.dart'; // Update with your actual path
+import 'addmenu.dart'; // Ensure this file exists
+import 'dabbawala_list_screen.dart'; // Ensure this file exists
+import 'order_list_screen.dart'; // Ensure this file exists
+import 'customer_list_screen.dart'; // Ensure this file exists
 
 class DashboardScreen extends StatelessWidget {
   @override
@@ -65,7 +65,7 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => OrderListScreen()),
+                      MaterialPageRoute(builder: (context) => OrderListScreen(cartItems: [], onRemoveFromCart: (Map<String, dynamic> item) { /* Handle item removal */ },)),
                     );
                   },
                 ),
@@ -89,7 +89,7 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Menu()),
+                      MaterialPageRoute(builder: (context) => Menu()), // Ensure Menu() is defined
                     );
                   },
                 ),
@@ -109,7 +109,7 @@ class DashboardScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => login()),
+                        MaterialPageRoute(builder: (context) => login()), // Ensure Login() is defined
                       );
                     },
                   ),
