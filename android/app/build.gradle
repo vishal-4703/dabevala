@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.new1"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -46,14 +46,24 @@ flutter {
 dependencies{
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation platform('com.google.firebase:firebase-bom:latest_version')
+    implementation 'com.google.firebase:firebase-core'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-analytics'
 
 
 // In the app-level build.gradle file
-    implementation 'com.google.firebase:firebase-firestore:24.6.0' // Firestore
-    implementation 'com.google.firebase:firebase-auth:21.0.1'  // Authentication
-    implementation 'com.google.firebase:firebase-database:20.1.0' // For Realtime Database
-    //implementation 'com.google.firebase:firebase-core:16.0.1'
-    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+    implementation 'com.google.firebase:firebase-firestore:24.6.0'
+    implementation 'com.google.firebase:firebase-auth:21.0.1'
+    implementation 'com.google.firebase:firebase-database:20.1.0'
+    implementation 'com.google.firebase:firebase-core:19.0.0'
+    implementation platform('com.google.firebase:firebase-bom:31.0.0')
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    apply plugin: 'com.google.gms.google-services'
+
+
+
+
 }
 
 

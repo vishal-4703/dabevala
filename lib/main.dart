@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         'first': (context) => first(),
         'second': (context) => second(),
         'third': (context) => third(),
-        'realtime': (context) => realtime(),
+        'realtime': (context) => Realtime(),
       },
       debugShowCheckedModeBanner: false,
     );

@@ -1,7 +1,30 @@
-
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final DatabaseReference _databaseReference =
+  FirebaseDatabase.instance.ref().child('users').child('users');
+  String _username = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUsername();
+  }
+
+  void _fetchUsername() {
+    _databaseReference.child('username').once().then((DatabaseEvent event) {
+      setState(() {
+        _username = event.snapshot.value as String;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +61,7 @@ class ProfilePage extends StatelessWidget {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'Vishal Shete',
+                          _username, // Display fetched username
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         ),
@@ -55,8 +78,12 @@ class ProfilePage extends StatelessWidget {
                     Navigator.pushNamed(context, 'restPage');
                   }),
                   buildMenuItem(
-                      context, Icons.shopping_cart, 'shopping cart', null, () {
+                      context, Icons.shopping_cart, 'Shopping Cart', null, () {
                     Navigator.pushNamed(context, 'card');
+                  }),
+                  buildMenuItem(
+                      context, Icons.delivery_dining, ' RealTime Tracking', null, () {
+                    Navigator.pushNamed(context, 'realtime');
                   }),
                   buildMenuItem(
                       context, Icons.payment, 'Payment', null, () {
