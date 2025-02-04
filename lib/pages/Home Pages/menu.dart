@@ -1,28 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Menu and Cart',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MenuPage(),
-      routes: {
-        'payment': (context) => PaymentPage(),
-      },
-    );
-  }
-}
 
 class MenuPage extends StatefulWidget {
   @override
@@ -267,7 +244,7 @@ class NextPage extends StatelessWidget {
     required this.cartItems,
   });
 
-  final DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('User   Cart'); // Reference to User Cart
+  final DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('UserCart'); // Reference to User Cart
 
   void addCartItemToDatabase(Map<String, dynamic> cartItem) {
     cartRef.push().set(cartItem).then((_) {
@@ -364,65 +341,31 @@ class NextPage extends StatelessWidget {
                       '₹ $price',
                       style: TextStyle(
                         fontSize: 24,
-                        color: Color(0xFF0223FA),
+                        color: Color(0xFF0223C3),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Full INDIAN Dish',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF828282),
+                    SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () {
+                        Map<String, dynamic> newCartItem = {
+                          'name': itemName,
+                          'price': price,
+                          'day': day,
+                          'imagePath': imagePath,
+                          'description': 'Delicious meal',
+                        };
+
+                        onAddToCart(newCartItem); // Update cartItems locally
+                        addCartItemToDatabase(newCartItem); // Save to Firebase
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Add to Cart',
+                        style: TextStyle(fontSize: 18),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: ElevatedButton(
-              onPressed: () {
-                final newCartItem = {
-                  'id': DateTime.now().toString(), // Unique ID for the cart item
-                  'name': itemName,
-                  'price': price,
-                  'day': day,
-                  'imagePath': imagePath,
-                  'description': 'Full INDIAN Dish',
-                };
-
-                onAddToCart(newCartItem);
-                addCartItemToDatabase(newCartItem); // Add to database
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Added to cart!'),
-                  ),
-                );
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CartPage(
-                      cartItems: cartItems,
-                      onRemoveFromCart: (item) {},
-                    ),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0333F4),
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                'Add To Cart',
-                style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
           ),
@@ -446,17 +389,52 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  double calculateTotal() {
-    return widget.cartItems.fold(0.0, (total, item) {
-      double itemPrice = double.tryParse(item['price']) ?? 0.0; // Ensure non-nullable
-      return total + itemPrice; // Add the item price to the total
+  late DatabaseReference _cartRef;
+  List<Map<String, dynamic>> _firebaseCartItems = [];
+  double _totalAmount = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _cartRef = FirebaseDatabase.instance.ref().child('UserCart');
+    _loadCartItems();
+  }
+
+  void _loadCartItems() {
+    _cartRef.onValue.listen((event) {
+      final dataSnapshot = event.snapshot;
+      List<Map<String, dynamic>> loadedCartItems = [];
+
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        values.forEach((key, value) {
+          loadedCartItems.add({
+            'id': key,
+            'name': value['name'],
+            'price': value['price'],
+            'day': value['day'],
+            'imagePath': value['imagePath'],
+            'description': value['description'],
+          });
+        });
+
+        setState(() {
+          _firebaseCartItems = loadedCartItems;
+          _totalAmount = _calculateTotal(_firebaseCartItems);
+        });
+      }
+    });
+  }
+
+  double _calculateTotal(List<Map<String, dynamic>> cartItems) {
+    return cartItems.fold(0.0, (total, item) {
+      double itemPrice = double.tryParse(item['price']) ?? 0.0;
+      return total + itemPrice;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    double totalAmount = calculateTotal();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Cart'),
@@ -464,10 +442,12 @@ class _CartPageState extends State<CartPage> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: widget.cartItems.length,
+            child: _firebaseCartItems.isEmpty
+                ? Center(child: Text('No items in cart'))
+                : ListView.builder(
+              itemCount: _firebaseCartItems.length,
               itemBuilder: (context, index) {
-                final item = widget.cartItems[index];
+                final item = _firebaseCartItems[index];
                 return Card(
                   margin: EdgeInsets.all(8.0),
                   child: ListTile(
@@ -477,7 +457,7 @@ class _CartPageState extends State<CartPage> {
                     trailing: IconButton(
                       icon: Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        _removeFromCart(item);
+                        _removeFromCart(item['id']);
                       },
                     ),
                   ),
@@ -488,7 +468,7 @@ class _CartPageState extends State<CartPage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Total: ₹$totalAmount',
+              'Total: ₹$_totalAmount',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
             ),
           ),
@@ -516,14 +496,20 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  void _removeFromCart(Map<String, dynamic> item) {
+
+
+  void _removeFromCart(String cartItemId) {
     setState(() {
-      widget.cartItems.remove(item);
+      _firebaseCartItems.removeWhere((item) => item['id'] == cartItemId);
     });
-    widget.onRemoveFromCart(item);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['name']} removed from cart')),
-    );
+
+    _cartRef.child(cartItemId).remove().then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Item removed from cart')),
+      );
+    }).catchError((error) {
+      print("Failed to remove item: $error");
+    });
   }
 }
 
@@ -531,14 +517,9 @@ class PaymentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Payment'),
-      ),
+      appBar: AppBar(title: Text('Payment')),
       body: Center(
-        child: Text(
-          'Payment processing will be implemented here.',
-          style: TextStyle(fontSize: 20),
-        ),
+        child: Text('Payment Page', style: TextStyle(fontSize: 24)),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -7,9 +8,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final DatabaseReference _databaseReference =
-  FirebaseDatabase.instance.ref().child('users').child('users');
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref().child('users');
   String _username = 'Loading...';
+  final User? _user = FirebaseAuth.instance.currentUser; // Get current user
 
   @override
   void initState() {
@@ -18,11 +19,23 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _fetchUsername() {
-    _databaseReference.child('username').once().then((DatabaseEvent event) {
-      setState(() {
-        _username = event.snapshot.value as String;
+    if (_user != null) {
+      _databaseReference.child(_user!.uid).child('username').onValue.listen((event) {
+        if (event.snapshot.value != null) {
+          setState(() {
+            _username = event.snapshot.value.toString();
+          });
+        } else {
+          setState(() {
+            _username = 'No Username Found';
+          });
+        }
       });
-    });
+    } else {
+      setState(() {
+        _username = 'User Not Logged In';
+      });
+    }
   }
 
   @override
@@ -61,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          _username, // Display fetched username
+                          _username, // Updated Username Display
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         ),
@@ -79,10 +92,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   }),
                   buildMenuItem(
                       context, Icons.shopping_cart, 'Shopping Cart', null, () {
-                    Navigator.pushNamed(context, 'card');
+                    Navigator.pushNamed(context, 'CartPage');
                   }),
                   buildMenuItem(
-                      context, Icons.delivery_dining, ' RealTime Tracking', null, () {
+                      context, Icons.delivery_dining, 'RealTime Tracking', null, () {
                     Navigator.pushNamed(context, 'realtime');
                   }),
                   buildMenuItem(
