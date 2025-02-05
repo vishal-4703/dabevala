@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/customer.dart';
-import '../widgets/customer_card.dart';
+import 'CustomerDetailScreen.dart';
+// Import the CustomerDetailScreen
 
 class CustomerListScreen extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       final List<Customer> customers = [];
       snapshot.children.forEach((child) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(child.value as Map);
-        customers.add(Customer.fromMap(data, child.key!)); // Pass both the map and the id (key)
+        customers.add(Customer.fromMap(data, child.key!));
       });
       return customers;
     } else {
@@ -36,7 +37,19 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Customer List'),
+        automaticallyImplyLeading: false, // Removes the back button
+        title: Text('Customer List', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        backgroundColor: Colors.blueAccent,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                _customersFuture = fetchCustomers(); // Refresh the data
+              });
+            },
+          )
+        ],
       ),
       body: FutureBuilder<List<Customer>>(
         future: _customersFuture,
@@ -60,18 +73,43 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   }
 
   Widget buildError(error) {
-    return Center(child: Text('Error: $error'));
+    return Center(child: Text('Error: $error', style: TextStyle(color: Colors.red)));
   }
 
   Widget buildNoData() {
-    return Center(child: Text('No customers found.'));
+    return Center(child: Text('No customers found.', style: TextStyle(color: Colors.grey)));
   }
 
   Widget buildList(List<Customer> customers) {
     return ListView.builder(
       itemCount: customers.length,
       itemBuilder: (context, index) {
-        return CustomerCard(customer: customers[index]);
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(16),
+              leading: CircleAvatar(
+                backgroundColor: Colors.blueAccent,
+                child: Icon(Icons.person, color: Colors.white),
+              ),
+              title: Text(customers[index].username, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              subtitle: Text(customers[index].email, style: TextStyle(fontSize: 14, color: Colors.grey)),
+              trailing: Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
+              onTap: () {
+                // Navigate to the detailed page of the selected customer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CustomerDetailScreen(customer: customers[index]),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
       },
     );
   }

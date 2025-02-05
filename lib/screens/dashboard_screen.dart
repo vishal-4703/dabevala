@@ -5,119 +5,74 @@ import 'dabbawala_list_screen.dart'; // Ensure this file exists
 import 'order_list_screen.dart'; // Ensure this file exists
 import 'customer_list_screen.dart'; // Ensure this file exists
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
+  @override
+  _DashboardScreenState createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    DabbawalaListScreen(),
+    OrderListScreen(cartItems: [], onRemoveFromCart: (item) {}),
+    CustomerListScreen(),
+    Menu(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index == 4) {
+      // Logout action
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => login()),
+      );
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Define a common button style
-    final buttonStyle = ElevatedButton.styleFrom(
-      backgroundColor: Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-      ),
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Dabbawala Admin Dashboard'),
         backgroundColor: Colors.blueAccent,
+        automaticallyImplyLeading: false, // Removes the back button
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Dabbawala',
           ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Welcome to the Dabbawala Admin Dashboard',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 40),
-                ElevatedButton.icon(
-                  icon: Icon(Icons.list, size: 24),
-                  label: Text('Dabbawala List', style: TextStyle(fontSize: 18)),
-                  style: buttonStyle,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => DabbawalaListScreen()),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: Icon(Icons.receipt, size: 24),
-                  label: Text('Order List', style: TextStyle(fontSize: 18)),
-                  style: buttonStyle,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => OrderListScreen(cartItems: [], onRemoveFromCart: (Map<String, dynamic> item) { /* Handle item removal */ },)),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: Icon(Icons.person, size: 24),
-                  label: Text('Customer List', style: TextStyle(fontSize: 18)),
-                  style: buttonStyle,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CustomerListScreen()),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: Icon(Icons.fastfood, size: 24),
-                  label: Text('Food List', style: TextStyle(fontSize: 18)),
-                  style: buttonStyle,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Menu()), // Ensure Menu() is defined
-                    );
-                  },
-                ),
-                Spacer(), // Add spacer to push the logout button to the bottom
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.logout, size: 24),
-                    label: Text('Logout', style: TextStyle(fontSize: 18)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent, // Logout button color
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => login()), // Ensure Login() is defined
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt),
+            label: 'Orders',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Customers',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fastfood),
+            label: 'Food List',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout, color: Colors.redAccent),
+            label: 'Logout',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
       ),
     );
   }

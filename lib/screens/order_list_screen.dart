@@ -76,7 +76,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Order Details'),
-        backgroundColor: Color(0xFF0333F4), // Primary color
+        backgroundColor: Color(0xFF5ACFF4), // Primary color
+        automaticallyImplyLeading: false, // Removes the back arrow
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center, // Center the column content

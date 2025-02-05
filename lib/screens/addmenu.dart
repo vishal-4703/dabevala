@@ -86,22 +86,8 @@ class _MenuState extends State<Menu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pushNamed(context, 'DashboardScreen');
-          },
-        ),
         title: Text('Our Menu'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.pushNamed(context, 'ShoppingCartScreen'); // Specify the route
-            },
-          ),
-          SizedBox(width: 15),
-        ],
+
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -152,6 +138,7 @@ class _MenuState extends State<Menu> {
           Navigator.pushNamed(context, 'AddMenuItemPage');
         },
         child: Icon(Icons.add),
+        
       ),
     );
   }

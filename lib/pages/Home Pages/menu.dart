@@ -357,7 +357,17 @@ class NextPage extends StatelessWidget {
 
                         onAddToCart(newCartItem); // Update cartItems locally
                         addCartItemToDatabase(newCartItem); // Save to Firebase
-                        Navigator.pop(context);
+
+                        // Navigate directly to the CartPage after adding item to the cart
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CartPage(
+                              cartItems: cartItems,
+                              onRemoveFromCart: (item) {},
+                            ),
+                          ),
+                        );
                       },
                       child: Text(
                         'Add to Cart',
@@ -375,6 +385,7 @@ class NextPage extends StatelessWidget {
   }
 }
 
+
 class CartPage extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
   final Function(Map<String, dynamic>) onRemoveFromCart;
@@ -389,106 +400,168 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  late DatabaseReference _cartRef;
-  List<Map<String, dynamic>> _firebaseCartItems = [];
-  double _totalAmount = 0.0;
+  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('UserCart');
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _cartRef = FirebaseDatabase.instance.ref().child('UserCart');
-    _loadCartItems();
+    fetchCartItems();
   }
 
-  void _loadCartItems() {
-    _cartRef.onValue.listen((event) {
-      final dataSnapshot = event.snapshot;
-      List<Map<String, dynamic>> loadedCartItems = [];
-
-      if (dataSnapshot.value != null) {
-        Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
-        values.forEach((key, value) {
-          loadedCartItems.add({
-            'id': key,
-            'name': value['name'],
-            'price': value['price'],
-            'day': value['day'],
-            'imagePath': value['imagePath'],
-            'description': value['description'],
+  Future<void> fetchCartItems() async {
+    try {
+      databaseReference.onValue.listen((event) {
+        List<Map<String, dynamic>> fetchedCartItems = [];
+        final dataSnapshot = event.snapshot;
+        if (dataSnapshot.value != null) {
+          Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+          values.forEach((key, value) {
+            fetchedCartItems.add({
+              'id': key,
+              'name': value['name'],
+              'price': value['price'],
+              'day': value['day'],
+              'imagePath': value['imagePath'],
+              'description': value['description'],
+            });
           });
-        });
-
+        }
         setState(() {
-          _firebaseCartItems = loadedCartItems;
-          _totalAmount = _calculateTotal(_firebaseCartItems);
+          widget.cartItems.clear();
+          widget.cartItems.addAll(fetchedCartItems);
+          isLoading = false;
         });
-      }
-    });
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load cart items.";
+        isLoading = false;
+      });
+    }
   }
 
-  double _calculateTotal(List<Map<String, dynamic>> cartItems) {
-    return cartItems.fold(0.0, (total, item) {
-      double itemPrice = double.tryParse(item['price']) ?? 0.0;
-      return total + itemPrice;
-    });
+  double calculateTotal() {
+    return widget.cartItems.fold(0.0, (total, item) => total + (double.tryParse(item['price']) ?? 0.0));
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(errorMessage!, style: TextStyle(color: Colors.red, fontSize: 18)),
+        ),
+      );
+    }
+
+    double totalAmount = calculateTotal();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cart'),
+        title: Text('Order Details', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF0333F4), // Primary color
+        automaticallyImplyLeading: false, // Removes the back arrow by default
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Go back to the previous page (NextPage)
+          },
+        ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: _firebaseCartItems.isEmpty
-                ? Center(child: Text('No items in cart'))
-                : ListView.builder(
-              itemCount: _firebaseCartItems.length,
+            child: ListView.builder(
+              itemCount: widget.cartItems.length,
+              padding: EdgeInsets.all(16),
               itemBuilder: (context, index) {
-                final item = _firebaseCartItems[index];
+                final item = widget.cartItems[index];
                 return Card(
-                  margin: EdgeInsets.all(8.0),
+                  margin: EdgeInsets.symmetric(vertical: 10),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   child: ListTile(
-                    leading: Image.asset(item['imagePath'], width: 70, height: 70),
-                    title: Text(item['name'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    subtitle: Text('Day: ${item['day']}\nPrice: ₹${item['price']}', style: TextStyle(fontSize: 14)),
+                    contentPadding: EdgeInsets.all(12),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        item['imagePath'],
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    title: Text(
+                      item['name'],
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 5),
+                        Text("Day: ${item['day']}", style: TextStyle(color: Colors.grey[700])),
+                        Text("Price: ₹${item['price']}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                      ],
+                    ),
                     trailing: IconButton(
                       icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        _removeFromCart(item['id']);
-                      },
+                      onPressed: () => _removeFromCart(item),
                     ),
                   ),
                 );
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Total: ₹$_totalAmount',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, 'payment');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0333F4),
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total:",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      "₹$totalAmount",
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0333F4)),
+                    ),
+                  ],
                 ),
-              ),
-              child: Text(
-                'Pay Now',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to payment
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF0333F4),
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.payment, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text("Proceed to Payment", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -496,31 +569,25 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-
-
-  void _removeFromCart(String cartItemId) {
+  void _removeFromCart(Map<String, dynamic> item) {
     setState(() {
-      _firebaseCartItems.removeWhere((item) => item['id'] == cartItemId);
+      widget.cartItems.remove(item);
     });
-
-    _cartRef.child(cartItemId).remove().then((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Item removed from cart')),
-      );
-    }).catchError((error) {
-      print("Failed to remove item: $error");
-    });
-  }
-}
-
-class PaymentPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Payment')),
-      body: Center(
-        child: Text('Payment Page', style: TextStyle(fontSize: 24)),
+    deleteItemFromDatabase(item['id']);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${item['name']} removed from cart'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.redAccent,
       ),
     );
+  }
+
+  void deleteItemFromDatabase(String itemId) {
+    databaseReference.child(itemId).remove().then((_) {
+      print("Item deleted successfully.");
+    }).catchError((error) {
+      print("Failed to delete item: $error");
+    });
   }
 }

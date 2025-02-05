@@ -6,9 +6,9 @@ class sahipanner extends StatelessWidget {
 
   void addToCart() {
     database.child('cart').push().set({
-      'name': 'Shahi Paneer',
+      'name': '',
       'price': 150,
-      'description': 'Shahi Paneer + Rice + Roti Full INDIAN Dish',
+      'description': '',
       'quantity': 1,
     });
   }
@@ -53,7 +53,7 @@ class sahipanner extends StatelessWidget {
               ),
               child: ClipOval(
                 child: Image.asset(
-                  'assets/sun.jpg', // Path to your local image asset
+                  'assets/', // Path to your local image asset
                   width: 300,
                   height: 300,
                   fit: BoxFit.cover,
@@ -62,7 +62,7 @@ class sahipanner extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Shahi Paneer',
+              '',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -85,7 +85,7 @@ class sahipanner extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Shahi Paneer + Rice + Roti Full INDIAN Dish',
+              ' Full INDIAN Dish',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -98,7 +98,7 @@ class sahipanner extends StatelessWidget {
                 addToCart();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Added Shahi Paneer to cart!'),
+                    content: Text('Added  to cart!'),
                   ),
                 );
                 Navigator.pushNamed(context, 'card');

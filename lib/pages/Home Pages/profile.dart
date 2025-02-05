@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,7 +13,10 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref().child('users');
   String _username = 'Loading...';
+  String? _imageUrl;
   final User? _user = FirebaseAuth.instance.currentUser; // Get current user
+  final ImagePicker _picker = ImagePicker();
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   @override
   void initState() {
@@ -31,6 +37,13 @@ class _ProfilePageState extends State<ProfilePage> {
           });
         }
       });
+      _databaseReference.child(_user!.uid).child('profilePicture').onValue.listen((event) {
+        if (event.snapshot.value != null) {
+          setState(() {
+            _imageUrl = event.snapshot.value.toString();
+          });
+        }
+      });
     } else {
       setState(() {
         _username = 'User Not Logged In';
@@ -38,102 +51,173 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // Method to pick image and upload it to Firebase Storage
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      // Get the file path and upload it to Firebase Storage
+      File imageFile = File(pickedFile.path);
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString(); // Unique name
+      try {
+        // Upload to Firebase Storage
+        final uploadTask = _storage.ref().child('profilePictures/$fileName').putFile(imageFile);
+        final snapshot = await uploadTask;
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
+        // Update the profile image URL in the Firebase Database
+        await _databaseReference.child(_user!.uid).update({
+          'profilePicture': downloadUrl,
+        });
+
+        // Update the image locally
+        setState(() {
+          _imageUrl = downloadUrl;
+        });
+      } catch (e) {
+        print("Error uploading image: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blueAccent,
       appBar: AppBar(
-        backgroundColor: Colors.white38,
-        elevation: 1,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () {
             Navigator.pushNamed(context, 'FoodGoHomePage');
           },
         ),
         title: Text(
           'Profile',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    color: Colors.white70,
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 70,
-                          backgroundImage: AssetImage('assets/profile.jpg'),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          _username, // Updated Username Display
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  buildMenuItem(
-                      context, Icons.notifications, 'Notifications', '3', () {
-                    Navigator.pushNamed(context, '');
-                  }),
-                  buildMenuItem(
-                      context, Icons.lock, 'Password Update', null, () {
-                    Navigator.pushNamed(context, 'restPage');
-                  }),
-                  buildMenuItem(
-                      context, Icons.shopping_cart, 'Shopping Cart', null, () {
-                    Navigator.pushNamed(context, 'CartPage');
-                  }),
-                  buildMenuItem(
-                      context, Icons.delivery_dining, 'RealTime Tracking', null, () {
-                    Navigator.pushNamed(context, 'realtime');
-                  }),
-                  buildMenuItem(
-                      context, Icons.payment, 'Payment', null, () {
-                    Navigator.pushNamed(context, 'payment');
-                  }),
-                  buildMenuItem(context, Icons.card_membership,
-                      'Membership Cards', null, () {
-                        Navigator.pushNamed(context, 'sub');
-                      }),
-                  buildMenuItem(
-                      context, Icons.settings_suggest_outlined, 'About Us', null, () {
-                    Navigator.pushNamed(context, '');
-                  }),
-                ],
-              ),
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.purpleAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, 'logout');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: _pickImage, // Open image picker when tapped
+                        child: CircleAvatar(
+                          radius: 70,
+                          backgroundImage: _imageUrl != null
+                              ? NetworkImage(_imageUrl!)
+                              : AssetImage('assets/profile.jpg') as ImageProvider,
+                          child: _imageUrl == null
+                              ? Icon(Icons.camera_alt, color: Colors.white, size: 30)
+                              : null,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        _username,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Tap to change your profile picture',
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      ),
+                      SizedBox(height: 30),
+                      buildMenuItem(
+                        context,
+                        Icons.notifications,
+                        'Notifications',
+                        '3',
+                            () {},
+                      ),
+                      buildMenuItem(
+                        context,
+                        Icons.lock,
+                        'Password Update',
+                        null,
+                            () {
+                          Navigator.pushNamed(context, 'restPage');
+                        },
+                      ),
+                      buildMenuItem(
+                        context,
+                        Icons.delivery_dining,
+                        'RealTime Tracking',
+                        null,
+                            () {
+                          Navigator.pushNamed(context, 'realtime');
+                        },
+                      ),
+                      buildMenuItem(
+                        context,
+                        Icons.payment,
+                        'Payment',
+                        null,
+                            () {
+                          Navigator.pushNamed(context, 'payment');
+                        },
+                      ),
+                      buildMenuItem(
+                        context,
+                        Icons.card_membership,
+                        'Membership Cards',
+                        null,
+                            () {
+                          Navigator.pushNamed(context, 'sub');
+                        },
+                      ),
+                      buildMenuItem(
+                        context,
+                        Icons.settings_suggest_outlined,
+                        'About Us',
+                        null,
+                            () {},
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Text(
-                'Log out',
-                style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, 'logout');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: Text(
+                  'Log out',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 20), // Add spacing below the button if needed
-        ],
+            SizedBox(height: 20), // Add spacing below the button if needed
+          ],
+        ),
       ),
     );
   }
@@ -141,10 +225,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildMenuItem(BuildContext context, IconData icon, String title,
       [String? badge, VoidCallback? onPressed]) {
     return Container(
-      color: Colors.white,
+      color: Colors.transparent,
       child: ListTile(
-        leading: Icon(icon, color: Colors.grey),
-        title: Text(title),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+        leading: Icon(icon, color: Colors.white),
+        title: Text(
+          title,
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
         trailing: badge != null && badge.isNotEmpty
             ? Container(
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -157,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(color: Colors.white, fontSize: 12),
           ),
         )
-            : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
         onTap: onPressed,
       ),
     );

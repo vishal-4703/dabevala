@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class FoodGoHomePage extends StatelessWidget {
+  final DatabaseReference _foodRef = FirebaseDatabase.instance.ref('foodItems');  // Firebase reference
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +28,6 @@ class FoodGoHomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // New UI Section
               buildHeader(),
               SizedBox(height: 25),
               TextField(
@@ -43,13 +45,12 @@ class FoodGoHomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10),
-              buildCarouselSlider(context), // Call the carousel slider here
+              buildCarouselSlider(context),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(width: 10, height: 120), // Add spacing between buttons
-                  // Non Veg Button
+                  SizedBox(width: 10, height: 120),
                   Expanded(
                     flex: 2,
                     child: CategoryButton(
@@ -276,6 +277,47 @@ class FoodGoHomePage extends StatelessWidget {
       }).toList(),
     );
   }
+
+  Future<List<FoodItem>> getFoodItems() async {
+    try {
+      final snapshot = await _foodRef.get();
+      final data = snapshot.value;
+
+      // Ensure that the data is not null and is of the type Map
+      if (data != null && data is Map<dynamic, dynamic>) {
+        List<FoodItem> foodItems = [];
+        Map<dynamic, dynamic> mapData = Map<dynamic, dynamic>.from(data);
+
+        // Iterate through the map and add FoodItem objects to the list
+        mapData.forEach((key, value) {
+          foodItems.add(FoodItem.fromMap(Map<String, dynamic>.from(value)));
+        });
+
+        return foodItems;
+      }
+
+      return [];
+    } catch (e) {
+      print('Error fetching food items: $e');
+      return [];
+    }
+  }
+}
+
+class FoodItem {
+  final String name;
+  final String description;
+  final double price;
+
+  FoodItem({required this.name, required this.description, required this.price});
+
+  factory FoodItem.fromMap(Map<String, dynamic> map) {
+    return FoodItem(
+      name: map['name'],
+      description: map['description'],
+      price: map['price'],
+    );
+  }
 }
 
 class OfferCard extends StatelessWidget {
@@ -371,32 +413,17 @@ class PopularCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 6)],
-        ),
-        width: 200,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.asset(imageUrl, height: 80, width: double.infinity, fit: BoxFit.cover),
-            SizedBox(height: 10),
-            Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            SizedBox(height: 5),
-            Text(description, style: TextStyle(color: Colors.grey)),
-            Spacer(),
-            Row(
-              children: [
-                Icon(Icons.star, color: Colors.orange, size: 16),
-                SizedBox(width: 5),
-                Text(rating.toString()),
-              ],
-            ),
-          ],
-        ),
+      child: Column(
+        children: [
+          Image.asset(imageUrl, height: 100, width: 100, fit: BoxFit.cover),
+          SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(description),
+          Text('Rating: $rating'),
+        ],
       ),
     );
   }
@@ -423,40 +450,22 @@ class NearYouCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 6)],
-        ),
+      child: Card(
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(imageUrl, height: 80, width: 80, fit: BoxFit.cover),
+            Image.asset(imageUrl, height: 100, width: 100),
             SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
                   SizedBox(height: 5),
-                  Text(description, style: TextStyle(color: Colors.grey)),
-                  SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      SizedBox(width: 5),
-                      Text(rating.toString()),
-                    ],
-                  ),
+                  Text(description),
                   SizedBox(height: 5),
                   Row(
                     children: tags
-                        .map((tag) => Padding(
-                      padding: const EdgeInsets.only(right: 4.0),
-                      child: Chip(label: Text(tag)),
-                    ))
+                        .map((tag) => Chip(label: Text(tag)))
                         .toList(),
                   ),
                 ],

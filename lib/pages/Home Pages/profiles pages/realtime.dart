@@ -135,7 +135,7 @@ class _RealtimeTrackingState extends State<Realtime> {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         title: Text('Delivery Tracking', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        backgroundColor: Colors.deepOrangeAccent,
+        backgroundColor: Colors.blue,
         elevation: 0,
       ),
       body: Column(

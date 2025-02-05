@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
         'chicken': (context) => chicken(),
         'vegnoodle': (context) => vegnoodle(),
         'panner': (context) => panner(),
-        'sahipanner': (context) => sahipanner(),
+
         'dal': (context) => dal(),
         'biryani': (context) => biryani(),
         'first': (context) => first(),
