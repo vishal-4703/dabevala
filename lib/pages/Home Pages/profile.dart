@@ -71,12 +71,20 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Update the image locally
         setState(() {
-          _imageUrl = downloadUrl;
+          _imageUrl = downloadUrl;  // Update the UI with the new image
         });
       } catch (e) {
         print("Error uploading image: $e");
       }
     }
+  }
+
+  Future<String?> _getImageUrl() async {
+    if (_user != null) {
+      final snapshot = await _databaseReference.child(_user!.uid).child('profilePicture').get();
+      return snapshot.value != null ? snapshot.value.toString() : null;
+    }
+    return null;  // Return null if no URL found
   }
 
   @override
@@ -116,14 +124,27 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       GestureDetector(
                         onTap: _pickImage, // Open image picker when tapped
-                        child: CircleAvatar(
-                          radius: 70,
-                          backgroundImage: _imageUrl != null
-                              ? NetworkImage(_imageUrl!)
-                              : AssetImage('assets/profile.jpg') as ImageProvider,
-                          child: _imageUrl == null
-                              ? Icon(Icons.camera_alt, color: Colors.white, size: 30)
-                              : null,
+                        child: FutureBuilder<String?>(
+                          future: _getImageUrl(), // Fetch image URL from Firebase
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircleAvatar(
+                                radius: 70,
+                                backgroundColor: Colors.grey,
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (snapshot.hasError || snapshot.data == null) {
+                              return CircleAvatar(
+                                radius: 70,
+                                backgroundImage: AssetImage('assets/profile.jpg'),
+                              );
+                            } else {
+                              return CircleAvatar(
+                                radius: 70,
+                                backgroundImage: NetworkImage(snapshot.data!),
+                              );
+                            }
+                          },
                         ),
                       ),
                       SizedBox(height: 20),
@@ -146,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Icons.notifications,
                         'Notifications',
                         '3',
-                            () {},
+                            () {} ,
                       ),
                       buildMenuItem(
                         context,
@@ -189,7 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Icons.settings_suggest_outlined,
                         'About Us',
                         null,
-                            () {},
+                            () {} ,
                       ),
                     ],
                   ),
