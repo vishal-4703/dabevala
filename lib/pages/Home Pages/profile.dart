@@ -12,38 +12,52 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref().child('users');
-  String _username = 'Loading...';
-  String? _imageUrl;
-  final User? _user = FirebaseAuth.instance.currentUser; // Get current user
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final ImagePicker _picker = ImagePicker();
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  String _username = 'Loading...';
+  String? _imageUrl;
+  int? Id; // Store user ID
 
   @override
   void initState() {
     super.initState();
-    _fetchUsername();
+    _fetchUserDetails();
   }
 
-  void _fetchUsername() {
-    if (_user != null) {
-      _databaseReference.child(_user!.uid).child('username').onValue.listen((event) {
+  /// Fetches user details based on the logged-in email
+  void _fetchUserDetails() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      String userEmail = user.email ?? "";
+      print("Fetching details for: $userEmail");
+
+      try {
+        DatabaseEvent event = await _databaseReference.orderByChild("email").equalTo(userEmail).once();
+
         if (event.snapshot.value != null) {
-          setState(() {
-            _username = event.snapshot.value.toString();
+          final data = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
+
+          data.forEach((key, value) {
+            setState(() {
+              Id = int.parse(key);  // Get the user ID
+              _username = value["username"];
+            });
+            print("User found: $_username, ID: $Id");
+            _fetchProfilePicture();
           });
         } else {
           setState(() {
-            _username = 'No Username Found';
+            _username = 'User Not Found';
           });
         }
-      });
-      _databaseReference.child(_user!.uid).child('profilePicture').onValue.listen((event) {
-        if (event.snapshot.value != null) {
-          setState(() {
-            _imageUrl = event.snapshot.value.toString();
-          });
-        }
-      });
+      } catch (error) {
+        print("Error fetching user: $error");
+        setState(() {
+          _username = 'Error fetching user';
+        });
+      }
     } else {
       setState(() {
         _username = 'User Not Logged In';
@@ -51,40 +65,42 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Method to pick image and upload it to Firebase Storage
+  /// Fetches Profile Picture if available
+  void _fetchProfilePicture() {
+    if (Id != null) {
+      _databaseReference.child(Id.toString()).child('profilePicture').onValue.listen((event) {
+        if (event.snapshot.value != null) {
+          setState(() {
+            _imageUrl = event.snapshot.value.toString();
+          });
+        }
+      });
+    }
+  }
+
+  /// Uploads a new Profile Picture to Firebase Storage
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      // Get the file path and upload it to Firebase Storage
       File imageFile = File(pickedFile.path);
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString(); // Unique name
+      String fileName = "profile_${Id}.jpg"; // Unique name using ID
+
       try {
-        // Upload to Firebase Storage
         final uploadTask = _storage.ref().child('profilePictures/$fileName').putFile(imageFile);
         final snapshot = await uploadTask;
         final downloadUrl = await snapshot.ref.getDownloadURL();
 
-        // Update the profile image URL in the Firebase Database
-        await _databaseReference.child(_user!.uid).update({
+        await _databaseReference.child(Id.toString()).update({
           'profilePicture': downloadUrl,
         });
 
-        // Update the image locally
         setState(() {
-          _imageUrl = downloadUrl;  // Update the UI with the new image
+          _imageUrl = downloadUrl;
         });
       } catch (e) {
         print("Error uploading image: $e");
       }
     }
-  }
-
-  Future<String?> _getImageUrl() async {
-    if (_user != null) {
-      final snapshot = await _databaseReference.child(_user!.uid).child('profilePicture').get();
-      return snapshot.value != null ? snapshot.value.toString() : null;
-    }
-    return null;  // Return null if no URL found
   }
 
   @override
@@ -122,39 +138,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
+                      // Profile Image Section
                       GestureDetector(
-                        onTap: _pickImage, // Open image picker when tapped
-                        child: FutureBuilder<String?>(
-                          future: _getImageUrl(), // Fetch image URL from Firebase
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Colors.grey,
-                                child: CircularProgressIndicator(),
-                              );
-                            } else if (snapshot.hasError || snapshot.data == null) {
-                              return CircleAvatar(
-                                radius: 70,
-                                backgroundImage: AssetImage('assets/profile.jpg'),
-                              );
-                            } else {
-                              return CircleAvatar(
-                                radius: 70,
-                                backgroundImage: NetworkImage(snapshot.data!),
-                              );
-                            }
-                          },
+                        onTap: _pickImage,
+                        child: CircleAvatar(
+                          radius: 70,
+                          backgroundImage: _imageUrl != null
+                              ? NetworkImage(_imageUrl!)
+                              : AssetImage('assets/profile.jpg') as ImageProvider,
+                          child: _imageUrl == null
+                              ? Icon(Icons.camera_alt, size: 30, color: Colors.white)
+                              : null,
                         ),
                       ),
                       SizedBox(height: 20),
+
+                      // Username
                       Text(
                         _username,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -162,61 +164,29 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                       SizedBox(height: 30),
-                      buildMenuItem(
-                        context,
-                        Icons.notifications,
-                        'Notifications',
-                        '3',
-                            () {} ,
-                      ),
-                      buildMenuItem(
-                        context,
-                        Icons.lock,
-                        'Password Update',
-                        null,
-                            () {
-                          Navigator.pushNamed(context, 'restPage');
-                        },
-                      ),
-                      buildMenuItem(
-                        context,
-                        Icons.delivery_dining,
-                        'RealTime Tracking',
-                        null,
-                            () {
-                          Navigator.pushNamed(context, 'realtime');
-                        },
-                      ),
-                      buildMenuItem(
-                        context,
-                        Icons.payment,
-                        'Payment',
-                        null,
-                            () {
-                          Navigator.pushNamed(context, 'payment');
-                        },
-                      ),
-                      buildMenuItem(
-                        context,
-                        Icons.card_membership,
-                        'Membership Cards',
-                        null,
-                            () {
-                          Navigator.pushNamed(context, 'sub');
-                        },
-                      ),
-                      buildMenuItem(
-                        context,
-                        Icons.settings_suggest_outlined,
-                        'About Us',
-                        null,
-                            () {} ,
-                      ),
+
+                      // Menu Items
+                      buildMenuItem(context, Icons.notifications, 'Notifications', '3', () {}),
+                      buildMenuItem(context, Icons.lock, 'Password Update', null, () {
+                        Navigator.pushNamed(context, 'restPage');
+                      }),
+                      buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', null, () {
+                        Navigator.pushNamed(context, 'realtime');
+                      }),
+                      buildMenuItem(context, Icons.payment, 'Payment', null, () {
+                        Navigator.pushNamed(context, 'payment');
+                      }),
+                      buildMenuItem(context, Icons.card_membership, 'Membership Cards', null, () {
+                        Navigator.pushNamed(context, 'sub');
+                      }),
+                      buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', null, () {}),
                     ],
                   ),
                 ),
               ),
             ),
+
+            // Logout Button
             Padding(
               padding: const EdgeInsets.all(20),
               child: ElevatedButton(
@@ -236,39 +206,26 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            SizedBox(height: 20), // Add spacing below the button if needed
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget buildMenuItem(BuildContext context, IconData icon, String title,
-      [String? badge, VoidCallback? onPressed]) {
-    return Container(
-      color: Colors.transparent,
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-        leading: Icon(icon, color: Colors.white),
-        title: Text(
-          title,
-          style: TextStyle(fontSize: 18, color: Colors.white),
-        ),
-        trailing: badge != null && badge.isNotEmpty
-            ? Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            badge,
-            style: TextStyle(color: Colors.white, fontSize: 12),
-          ),
-        )
-            : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
-        onTap: onPressed,
-      ),
+  Widget buildMenuItem(BuildContext context, IconData icon, String title, [String? badge, VoidCallback? onPressed]) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: TextStyle(fontSize: 18, color: Colors.white)),
+      trailing: badge != null
+          ? Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(12)),
+        child: Text(badge, style: TextStyle(color: Colors.white, fontSize: 12)),
+      )
+          : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+      onTap: onPressed,
     );
   }
 }

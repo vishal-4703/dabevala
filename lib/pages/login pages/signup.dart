@@ -1,39 +1,107 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import '../usee_AUTH/firebase_auth_implemenation/firebase_auth_service.dart';
 
-class login extends StatefulWidget {
+class signup extends StatefulWidget {
   @override
-  _LoginState createState() => _LoginState();
+  _SignupState createState() => _SignupState();
 }
 
-class _LoginState extends State<login> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool _obscureText = true;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class _SignupState extends State<signup> {
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _passwordVisible = false;
+  bool _isLoading = false;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    String username = _usernameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    try {
+      User? user = await _auth.signUpWithEmailAndPassword(email, password);
+      if (user != null) {
+        DatabaseReference userRef = FirebaseDatabase.instance.ref("users");
+        DatabaseReference counterRef = FirebaseDatabase.instance.ref("lastId");
+
+        int newId = 1;
+        DataSnapshot snapshot = await counterRef.get();
+        if (snapshot.exists) {
+          newId = (snapshot.value as int) + 1;
+        }
+
+        // Store new user with auto-incrementing ID (No uid)
+        await userRef.child(newId.toString()).set({
+          'id': newId,
+          'username': username,
+          'email': email,
+          'createdAt': DateTime.now().toIso8601String(),
+        });
+
+        // Update last used ID
+        await counterRef.set(newId);
+
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Signup Successful!")));
+        Navigator.pushNamed(context, 'login');
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() => _isLoading = false);
+      String errorMessage = e.code == 'email-already-in-use'
+          ? "Email is already in use."
+          : e.code == 'weak-password'
+          ? "Password should be at least 6 characters."
+          : "Signup failed, please try again.";
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/dabba.jpg',
-              fit: BoxFit.cover, // Ensure the image covers the entire screen
+          /// **Background Image with Blur Effect**
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/sig1.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
             ),
           ),
-          // Animated Welcome Text
+
+          /// **Animated Welcome Text**
           Positioned(
             top: 100,
             left: 50,
             child: AnimatedTextKit(
               animatedTexts: [
                 TypewriterAnimatedText(
-                  'Welcome Back Online \nDabbawala System',
+                  'Welcome Back Online \n Dabbawala System',
                   textStyle: GoogleFonts.poppins(
                     fontSize: 34,
                     foreground: Paint()
@@ -41,7 +109,7 @@ class _LoginState extends State<login> {
                         colors: [Colors.blue, Colors.purple],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                      ).createShader(Rect.fromLTWH(0.0, 0.0, 300.0, 100.0)),
+                      ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
                     shadows: [
                       Shadow(
                         blurRadius: 5.0,
@@ -56,171 +124,90 @@ class _LoginState extends State<login> {
               repeatForever: true,
             ),
           ),
-          // Main content
+
+          /// **Glassmorphism Card**
           Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 35.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 200), // Adjust spacing
-                      // Email Input Field
-                      TextFormField(
-                        controller: emailController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.email, color: Colors.white),
-                          hintText: "Enter your email",
-                          hintStyle: TextStyle(color: Colors.white),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.blue),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 30),
-                      // Password Input Field
-                      TextFormField(
-                        controller: passwordController,
-                        style: TextStyle(color: Colors.white),
-                        obscureText: _obscureText,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock, color: Colors.white),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureText ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscureText = !_obscureText;
-                              });
-                            },
-                          ),
-                          hintText: "Enter your password",
-                          hintStyle: TextStyle(color: Colors.white),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.blue),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 40),
-                      // Login Button
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: double.infinity,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            gradient: LinearGradient(
-                              colors: [Colors.blue, Colors.purple],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: TextButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                if (emailController.text == 'admin@gmail.com' &&
-                                    passwordController.text == 'admin12345') {
-                                  Navigator.pushNamed(context, 'DashboardScreen');
-                                } else {
-                                  try {
-                                    UserCredential userCredential =
-                                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                                      email: emailController.text,
-                                      password: passwordController.text,
-                                    );
-                                    Navigator.pushNamed(context, 'FoodDeliveryScreen');
-                                  } on FirebaseAuthException catch (e) {
-                                    // Handle error
-                                  }
-                                }
-                              }
-                            },
-                            child: Text(
-                              'Login',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      // Signup and Forgot Password Links
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, 'signup');
-                            },
-                            child: Text(
-                              'Signup',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, 'forgetpassword');
-                            },
-                            child: Text(
-                              'Forgot Password',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.85,
+              padding: EdgeInsets.all(25),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    spreadRadius: 3,
                   ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Create Account",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    _buildTextField("Username", _usernameController, Icons.person, false),
+                    SizedBox(height: 15),
+                    _buildTextField("Email", _emailController, Icons.email, false),
+                    SizedBox(height: 15),
+                    _buildTextField("Password", _passwordController, Icons.lock, true),
+                    SizedBox(height: 25),
+                    ElevatedButton(
+                      onPressed: _isLoading ? null : _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 18)),
+                    ),
+                    SizedBox(height: 15),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, 'login'),
+                      child: Text("Already have an account? Login", style: TextStyle(color: Colors.white70)),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextField(String hint, TextEditingController controller, IconData icon, bool isPassword) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isPassword && !_passwordVisible,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.white70),
+          onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+        )
+            : null,
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.2),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+      ),
+      validator: (value) => value!.isEmpty ? "Please enter your $hint" : null,
     );
   }
 }
