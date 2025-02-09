@@ -13,7 +13,7 @@ class CustomerDetailScreen extends StatelessWidget {
 
   Future<bool> isLottieAvailable() async {
     try {
-      String data = await rootBundle.loadString('assets/animations/customer_info.json');
+      String data = await rootBundle.loadString('assets/animations/');
       return data.isNotEmpty;
     } catch (e) {
       print("Lottie Animation Error: $e");

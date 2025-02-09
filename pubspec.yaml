@@ -24,6 +24,7 @@ dependencies:
   animated_text_kit: ^4.2.3
   lottie: ^3.3.1
   animate_do: ^3.3.7
+  glassmorphism: ^3.0.0
 
 
 
@@ -54,7 +55,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
-    - assets/animations/customer_info.json
+    - assets/animations/
 
 
   #   - images/a_dot_ham.jpeg

@@ -8,7 +8,7 @@ class TColor {
   static const Color primaryText = Color(0xFF000000);
   static const Color secondaryText = Color(0xFF888888);
   static const Color textfield = Color(0xFFE0E0E0);
-  static const Color primary = Color(0xFF00FF00);
+  static const Color primary = Color(0xFF3B2FE4);
 }
 
 class payment extends StatefulWidget {
@@ -143,55 +143,7 @@ class _PaymentPageState extends State<payment> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Order Summary',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: TColor.primaryText,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    for (var item in _cartItems)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('${item['name']} (x${item['quantity']})', style: TextStyle(fontSize: 16)),
-                            Text('₹${item['price'] * item['quantity']}', style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ),
-                    const Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '₹$_totalPrice',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
             ElevatedButton(
               onPressed: openCheckout,
               style: ElevatedButton.styleFrom(
