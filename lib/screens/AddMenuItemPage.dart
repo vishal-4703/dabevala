@@ -14,27 +14,39 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
 
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref().child("MenuItems");
 
-  void _addMenuItem() {
-    final String itemName = _itemNameController.text;
-    final String day = _dayController.text;
-    final String price = _priceController.text;
-    final String imagePath = _imagePathController.text;
+  String _selectedCategory = "meals"; // Default category
 
-    if (itemName.isNotEmpty && day.isNotEmpty && price.isNotEmpty) {
-      _dbRef.push().set({
-        "itemName": itemName,
-        "day": day,
-        "price": price,
-        "assetImagePath": imagePath,
-      }).then((_) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Menu Item Added')));
-        Navigator.pop(context);
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add item')));
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('All fields are required')));
+  void _addMenuItem() {
+    final String itemName = _itemNameController.text.trim();
+    final String day = _dayController.text.trim();
+    final String price = _priceController.text.trim();
+    final String imagePath = _imagePathController.text.trim();
+
+    if (itemName.isEmpty || day.isEmpty || price.isEmpty || _selectedCategory.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠️ All fields are required!')),
+      );
+      return;
     }
+
+    _dbRef.push().set({
+      "itemName": itemName,
+      "day": day,
+      "price": price,
+      "assetImagePath": imagePath,
+      "category": _selectedCategory,
+    }).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ Menu Item Added Successfully!')),
+      );
+      Navigator.pop(context);
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ Failed to add item: $error')),
+      );
+    });
+
+    print("✔ Added Item: $itemName | Day: $day | Price: ₹$price | Category: $_selectedCategory");
   }
 
   @override
@@ -42,28 +54,19 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Menu Item'),
-        automaticallyImplyLeading: true, // This adds the default back button (left-side arrow)
-        backgroundColor: Colors.lightBlue,
-        elevation: 0,
+        backgroundColor: Colors.blue,
+        elevation: 3,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(
-              Icons.restaurant_menu, // Icon for visual appeal
-              size: 50,
-              color: Colors.lightBlue,
-            ),
+            Icon(Icons.restaurant_menu, size: 50, color: Colors.blue),
             SizedBox(height: 20),
             Text(
               'Add a New Menu Item',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.lightBlue,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
@@ -88,7 +91,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
             TextField(
               controller: _priceController,
               decoration: InputDecoration(
-                labelText: 'Price',
+                labelText: 'Price (₹)',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.monetization_on),
               ),
@@ -103,18 +106,36 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 prefixIcon: Icon(Icons.image),
               ),
             ),
+            SizedBox(height: 15),
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: InputDecoration(
+                labelText: "Select Category",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.category),
+              ),
+              items: [
+                DropdownMenuItem(value: "meals", child: Text("Meals")),
+                DropdownMenuItem(value: "7days", child: Text("7 Days Meals")),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value!;
+                });
+              },
+            ),
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: _addMenuItem,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlue,
+                backgroundColor: Colors.blue,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 textStyle: TextStyle(fontSize: 18),
               ),
-              child: Text('Add Item'),
+              child: Text('➕ Add Item'),
             ),
           ],
         ),

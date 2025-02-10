@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'pages/Home Pages/profiles pages/Notifications.dart';
 import 'pages/Home Pages/profiles pages/SubscriptionDetailsPage.dart';
 import 'screens/AddMenuItemPage.dart';
 import 'screens/addmenu.dart';
@@ -79,7 +80,7 @@ class MyApp extends StatelessWidget {
         'chicken': (context) => chicken(),
         'vegnoodle': (context) => vegnoodle(),
         'panner': (context) => panner(),
-
+        'NotificationsPage': (context) => NotificationsPage(),
         'dal': (context) => dal(),
         'biryani': (context) => biryani(),
         'first': (context) => first(),

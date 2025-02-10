@@ -166,7 +166,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: 30),
 
                       // Menu Items
-                      buildMenuItem(context, Icons.notifications, 'Notifications', '3', () {}),
+                      buildMenuItem(context, Icons.notifications, 'Notifications', '3', () {
+                        Navigator.pushNamed(context, 'NotificationsPage');
+                      }),
                       buildMenuItem(context, Icons.lock, 'Password Update', null, () {
                         Navigator.pushNamed(context, 'restPage');
                       }),

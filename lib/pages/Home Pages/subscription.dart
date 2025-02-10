@@ -68,7 +68,7 @@ class sub extends StatelessWidget {
                   child: _buildPricingCard(
                     title: '6 MONTH',
                     price: '₹15,000',
-                    color: Colors.green,
+                    color: Colors.lightBlue,
                     features: ['Priority Delivery', 'Exclusive Offers', 'VIP Support'],
                     context: context,
                   ),
