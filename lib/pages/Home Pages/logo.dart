@@ -94,7 +94,7 @@ class FoodDeliveryScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 12,
-                      shadowColor: Colors.purpleAccent,
+                      shadowColor: Colors.blue,
                     ),
                     child: GlowText(
                       '____नमस्ते तुमचे स्वागत आहे____',
