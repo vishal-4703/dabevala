@@ -40,7 +40,7 @@ class _SignupState extends State<signup> {
     try {
       User? user = await _auth.signUpWithEmailAndPassword(email, password);
       if (user != null) {
-        DatabaseReference userRef = FirebaseDatabase.instance.ref("users");
+        DatabaseReference usersRef = FirebaseDatabase.instance.ref("users");
         DatabaseReference counterRef = FirebaseDatabase.instance.ref("lastId");
 
         int newId = 1;
@@ -49,15 +49,15 @@ class _SignupState extends State<signup> {
           newId = (snapshot.value as int) + 1;
         }
 
-        // Store new user with auto-incrementing ID (No uid)
-        await userRef.child(newId.toString()).set({
+        // Store new user in Firebase
+        await usersRef.child(newId.toString()).set({
           'id': newId,
           'username': username,
           'email': email,
           'createdAt': DateTime.now().toIso8601String(),
         });
 
-        // Update last used ID
+        // Update the last used ID
         await counterRef.set(newId);
 
         setState(() => _isLoading = false);
@@ -80,7 +80,6 @@ class _SignupState extends State<signup> {
     return Scaffold(
       body: Stack(
         children: [
-          /// **Background Image with Blur Effect**
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -94,7 +93,6 @@ class _SignupState extends State<signup> {
             ),
           ),
 
-          /// **Animated Welcome Text**
           Positioned(
             top: 100,
             left: 50,
@@ -125,7 +123,6 @@ class _SignupState extends State<signup> {
             ),
           ),
 
-          /// **Glassmorphism Card**
           Center(
             child: Container(
               width: MediaQuery.of(context).size.width * 0.85,

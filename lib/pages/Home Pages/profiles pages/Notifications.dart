@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter/services.dart';
 import 'dart:math';
+
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: NotificationsPage(),
+  ));
+}
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -48,9 +56,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void _addRandomNotifications() {
     List<Map<String, String>> sampleNotifications = [
-      { 'title': 'Order Placed', 'message': 'Your order has been successfully placed!' },
-      { 'title': 'Order Dispatched', 'message': 'Your order is on the way!' },
-      { 'title': 'Order Delivered', 'message': 'Your order has been delivered!' }
+      {'title': 'Order Placed', 'message': 'Your order has been successfully placed!'},
+      {'title': 'Order Dispatched', 'message': 'Your order is on the way!'},
+      {'title': 'Order Delivered', 'message': 'Your order has been delivered!'}
     ];
 
     for (var notification in sampleNotifications) {
@@ -80,12 +88,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text('Notifications', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Notifications', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.blueAccent, Colors.indigo]),
+          ),
+        ),
         actions: [
           if (selectedNotifications.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete, color: Colors.white),
               onPressed: _deleteSelectedNotifications,
             ),
         ],
@@ -107,39 +121,137 @@ class _NotificationsPageState extends State<NotificationsPage> {
         itemBuilder: (context, index) {
           final notification = notifications[index];
           final isSelected = selectedNotifications.contains(notification['id']);
-          return GestureDetector(
-            onLongPress: () {
-              setState(() {
-                if (isSelected) {
-                  selectedNotifications.remove(notification['id']);
-                } else {
-                  selectedNotifications.add(notification['id']);
-                }
-              });
+          return Dismissible(
+            key: Key(notification['id']),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Icon(Icons.delete, color: Colors.white, size: 30),
+            ),
+            onDismissed: (direction) {
+              _notificationsRef.child(notification['id']).remove();
             },
-            child: Card(
-              margin: EdgeInsets.all(8),
-              elevation: 4,
-              color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(color: Colors.grey.shade300, blurRadius: 5, spreadRadius: 2),
+                ],
+              ),
               child: ListTile(
-                leading: Icon(
-                  notification['read'] ? Icons.notifications : Icons.notifications_active,
-                  color: notification['read'] ? Colors.grey : Colors.blue,
+                contentPadding: EdgeInsets.all(12),
+                leading: Hero(
+                  tag: notification['id'],
+                  child: CircleAvatar(
+                    backgroundColor: notification['read'] ? Colors.grey[300] : Colors.blueAccent,
+                    child: Icon(
+                      notification['read'] ? Icons.notifications : Icons.notifications_active,
+                      color: notification['read'] ? Colors.grey : Colors.white,
+                    ),
+                  ),
                 ),
                 title: Text(notification['title'], style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(notification['message']),
                 trailing: isSelected
                     ? Icon(Icons.check_circle, color: Colors.blue)
-                    : Icon(Icons.arrow_forward, color: Colors.grey),
+                    : Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
                   if (!notification['read']) {
                     _markAsRead(notification['id']);
                   }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationDetailPage(notification: notification),
+                    ),
+                  );
+                },
+                onLongPress: () {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    if (isSelected) {
+                      selectedNotifications.remove(notification['id']);
+                    } else {
+                      selectedNotifications.add(notification['id']);
+                    }
+                  });
                 },
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// 📌 Notification Detail Page
+class NotificationDetailPage extends StatelessWidget {
+  final Map<String, dynamic> notification;
+
+  NotificationDetailPage({required this.notification});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(notification['title']),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.blueAccent, Colors.indigo]),
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Hero(
+                tag: notification['id'],
+                child: Icon(
+                  Icons.notifications_active,
+                  size: 80,
+                  color: Colors.blueAccent,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              notification['title'],
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.indigo),
+            ),
+            SizedBox(height: 10),
+            Text(
+              notification['message'],
+              style: TextStyle(fontSize: 18, color: Colors.black87),
+            ),
+            SizedBox(height: 30),
+            Row(
+              children: [
+                Icon(Icons.access_time, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  notification['timestamp'].toString(),
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              ],
+            ),
+            Spacer(),
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Back to Notifications"),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

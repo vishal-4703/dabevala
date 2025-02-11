@@ -2,20 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class OrderListScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> cartItems;
-  final Function(Map<String, dynamic>) onRemoveFromCart;
-
-  OrderListScreen({
-    required this.cartItems,
-    required this.onRemoveFromCart,
-  });
-
   @override
   _OrderListScreenState createState() => _OrderListScreenState();
 }
 
 class _OrderListScreenState extends State<OrderListScreen> {
-  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref().child('UserCart');
+  final DatabaseReference databaseReference =
+  FirebaseDatabase.instance.ref().child('cartItems');
+
+  List<Map<String, dynamic>> cartItems = [];
   bool isLoading = true;
   String? errorMessage;
 
@@ -28,24 +23,31 @@ class _OrderListScreenState extends State<OrderListScreen> {
   Future<void> fetchCartItems() async {
     try {
       databaseReference.onValue.listen((event) {
-        List<Map<String, dynamic>> fetchedCartItems = [];
-        final dataSnapshot = event.snapshot;
-        if (dataSnapshot.value != null) {
-          Map<dynamic, dynamic> values = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
-          values.forEach((key, value) {
-            fetchedCartItems.add({
-              'id': key,
-              'name': value['name'],
-              'price': value['price'],
-              'day': value['day'],
-              'imagePath': value['imagePath'],
-              'description': value['description'],
-            });
+        if (event.snapshot.value == null) {
+          setState(() {
+            cartItems.clear();
+            isLoading = false;
           });
+          return;
         }
+
+        List<Map<String, dynamic>> fetchedCartItems = [];
+        Map<dynamic, dynamic> values =
+        Map<dynamic, dynamic>.from(event.snapshot.value as Map);
+
+        values.forEach((key, value) {
+          fetchedCartItems.add({
+            'id': key,
+            'name': value['name'] ?? 'Unknown',
+            'price': value['price'] ?? '0',
+            'day': value['day'] ?? 'Unknown',
+            'image': value['image'] ?? '', // Store image path or URL
+            'description': value['description'] ?? 'No description available',
+          });
+        });
+
         setState(() {
-          widget.cartItems.clear();
-          widget.cartItems.addAll(fetchedCartItems);
+          cartItems = fetchedCartItems;
           isLoading = false;
         });
       });
@@ -58,65 +60,13 @@ class _OrderListScreenState extends State<OrderListScreen> {
   }
 
   double calculateTotal() {
-    return widget.cartItems.fold(0.0, (total, item) => total + (double.tryParse(item['price']) ?? 0.0));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (errorMessage != null) {
-      return Center(child: Text(errorMessage!));
-    }
-
-    double totalAmount = calculateTotal();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Order Details'),
-        backgroundColor: Color(0xFF5ACFF4), // Primary color
-        automaticallyImplyLeading: false, // Removes the back arrow
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // Center the column content
-        children: [
-          Expanded(
-            child: Center( // Center the ListView
-              child: ListView.builder(
-                itemCount: widget.cartItems.length,
-                itemBuilder: (context, index) {
-                  final item = widget.cartItems[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: ListTile(
-                      leading: Image.asset(item['imagePath'], width: 50, height: 50),
-                      title: Text(item['name'], style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('Day: ${item['day']}\nPrice: ₹${item['price']}', style: TextStyle(color: Colors.grey[600])),
-                      // Removed the delete button
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Total: ₹$totalAmount',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0333F4)),
-            ),
-          ),
-          // Removed the Proceed to Payment button
-        ],
-      ),
-    );
+    return cartItems.fold(
+        0.0, (total, item) => total + (double.tryParse(item['price'].toString()) ?? 0.0));
   }
 
   void _removeFromCart(Map<String, dynamic> item) {
     setState(() {
-      widget.cartItems.remove(item);
+      cartItems.remove(item);
     });
     deleteItemFromDatabase(item['id']);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -130,5 +80,92 @@ class _OrderListScreenState extends State<OrderListScreen> {
     }).catchError((error) {
       print("Failed to delete item: $error");
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Order Details', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF5ACFF4),
+        automaticallyImplyLeading: false,
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage != null
+          ? Center(
+        child: Text(
+          errorMessage!,
+          style: TextStyle(color: Colors.red, fontSize: 18),
+        ),
+      )
+          : Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: cartItems.length,
+              itemBuilder: (context, index) {
+                final item = cartItems[index];
+
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(12),
+                    leading: item['image'] != null && item['image'].isNotEmpty
+                        ? (item['image'].startsWith('assets/')
+                        ? Image.asset(
+                      item['image'],
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.network(
+                      item['image'],
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.broken_image, size: 60, color: Colors.grey);
+                      },
+                    ))
+                        : Icon(Icons.image, size: 60, color: Colors.grey),
+                    title: Text(
+                      item['name'],
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    subtitle: Text(
+                      'Day: ${item['day']}\nPrice: ₹${item['price']}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _removeFromCart(item),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Total: ₹${calculateTotal().toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0333F4),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

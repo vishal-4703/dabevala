@@ -170,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Navigator.pushNamed(context, 'NotificationsPage');
                       }),
                       buildMenuItem(context, Icons.lock, 'Password Update', null, () {
-                        Navigator.pushNamed(context, 'restPage');
+                        Navigator.pushNamed(context, 'forgetpassword');
                       }),
                       buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', null, () {
                         Navigator.pushNamed(context, 'realtime');
@@ -181,7 +181,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       buildMenuItem(context, Icons.card_membership, 'Membership Cards', null, () {
                         Navigator.pushNamed(context, 'sub');
                       }),
-                      buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', null, () {}),
+                      buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', null, () {
+                        Navigator.pushNamed(context, 'AboutUsPage');
+                      }),
                     ],
                   ),
                 ),

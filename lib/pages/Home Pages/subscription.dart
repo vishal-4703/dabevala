@@ -14,9 +14,8 @@ class sub extends StatelessWidget {
         leading: FadeInLeft(
           child: IconButton(
             icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, 'FoodGoHomePage');
-            },
+            onPressed: () => Navigator.pop(context),
+
           ),
         ),
         title: FadeInDown(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'pages/Home Pages/profiles pages/About Us.dart';
 import 'pages/Home Pages/profiles pages/Notifications.dart';
 import 'pages/Home Pages/profiles pages/SubscriptionDetailsPage.dart';
 import 'screens/AddMenuItemPage.dart';
@@ -26,15 +27,12 @@ import 'pages/Home Pages/profiles pages/logout.dart';
 import 'pages/Home Pages/logo.dart';
 import 'pages/Home Pages/home.dart';
 import 'pages/Home Pages/profile.dart';
-import 'pages/Home Pages/profiles pages/passwordupdate.dart';
-import 'pages/Home Pages/profiles pages/updatenext.dart';
 import 'pages/Home Pages/profiles pages/payment.dart';
 import 'pages/Home Pages/subscription.dart';
 import 'pages/Home Pages/food pages/Nonevegfood.dart';
 import 'pages/Home Pages/food pages/food iteam page/chicken.dart';
 import 'pages/Home Pages/food pages/food iteam page/vegnoodle.dart';
 import 'pages/Home Pages/food pages/food iteam page/panner.dart';
-import 'pages/Home Pages/food pages/food iteam page/sahipanner.dart';
 import 'pages/Home Pages/food pages/food iteam page/dalmasala.dart';
 import 'pages/Home Pages/food pages/food iteam page/biryani.dart';
 
@@ -62,6 +60,7 @@ class MyApp extends StatelessWidget {
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
         //'FoodItemScreen': (context) => FoodListPage(),
         'nonveg': (context) => nonveg(),
+        'AboutUsPage': (context) => AboutUsPage(),
         'butterchicken': (context) => butterchicken(),
         'fish': (context) => fish(),
         'bangda': (context) => bangda(),
@@ -75,8 +74,6 @@ class MyApp extends StatelessWidget {
         'logout': (context) => logout(),
         'ProfilePage': (context) => ProfilePage(),
         'payment': (context) => payment(),
-        'restPage': (context) => restPage(),
-        'updatepage': (context) => updatepage(),
         'chicken': (context) => chicken(),
         'vegnoodle': (context) => vegnoodle(),
         'panner': (context) => panner(),

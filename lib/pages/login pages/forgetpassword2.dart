@@ -1,70 +1,104 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:lottie/lottie.dart';
 
 class forgetpassword2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image.network(
-                'https://storage.googleapis.com/a1aa/image/bdYsepq1klXMXKAyTpLb9Ob6pKOSf9Re43gS8QTe0pHsa3aPB.jpg',
-                height: 150,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Forget Password',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Your password has been forget successfully',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, 'login');
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 20), backgroundColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF7F00FF), Color(0xFFE900FF), Color(0xFFFF5722)],
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                FadeInDown(
+                  duration: Duration(milliseconds: 800),
+                  child: Lottie.network(
+                    'https://assets6.lottiefiles.com/packages/lf20_jcikwtux.json',
+                    height: 150,
                   ),
-                  elevation: 0,
                 ),
-
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF7F00FF), Color(0xFFE900FF)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
+                SizedBox(height: 20),
+                FadeInUp(
+                  duration: Duration(milliseconds: 1000),
                   child: Text(
-                    'CONTINUE ',
-                    style: TextStyle(
+                    'Forget Password',
+                    style: GoogleFonts.poppins(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10,
+                          color: Colors.black38,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              )],
+                SizedBox(height: 10),
+                FadeInUp(
+                  duration: Duration(milliseconds: 1200),
+                  child: Text(
+                    'Your password has been reset successfully.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      color: Colors.white70,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(height: 30),
+                FadeInUp(
+                  duration: Duration(milliseconds: 1400),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, 'login');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 12,
+                      shadowColor: Colors.white,
+                      backgroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      'CONTINUE',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purpleAccent,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                FadeInUp(
+                  duration: Duration(milliseconds: 1600),
+                  child: Text(
+                    'Redirecting to login page...',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.white70,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
