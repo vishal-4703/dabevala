@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'cart_page.dart';
 
 class NextPage extends StatelessWidget {
@@ -136,31 +137,49 @@ class NextPage extends StatelessWidget {
     );
   }
 
-  // 🔹 Function to Add Item to Firebase Cart
-  void _addToCart(BuildContext context) {
+  // 🔹 Function to Fetch User ID & Add Item to Cart
+  void _addToCart(BuildContext context) async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    String userEmail = user.email ?? "";
+    DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('users');
     DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('cartItems');
 
-    String newItemKey = cartRef.push().key!;
+    // 🔹 Find the User ID from `users` table using Email
+    usersRef.orderByChild("email").equalTo(userEmail).once().then((event) {
+      final dataSnapshot = event.snapshot;
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> userData = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        userData.forEach((key, value) {
+          String userId = value['id'].toString();
+          String newCartItemKey = cartRef.child(userId).push().key ?? "";
 
-    cartRef.child(newItemKey).set({
-      'name': itemName,
-      'day': day,
-      'price': price,
-      'image': assetImagePath,
+          // 🔹 Add Item to `cartItems/{userId}`
+          cartRef.child(userId).child(newCartItemKey).set({
+            'name': itemName,
+            'day': day,
+            'price': price,
+            'image': assetImagePath,
+          }).then((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$itemName added to cart'),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            // Navigate to Cart Page
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CartPage()),
+            );
+          }).catchError((error) {
+            print("Failed to add item: $error");
+          });
+        });
+      }
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$itemName added to cart'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    // Navigate to Cart Page
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => CartPage()),
-    );
   }
 }
 

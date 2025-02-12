@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -8,68 +9,116 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  final DatabaseReference _cartRef = FirebaseDatabase.instance.ref().child('cartItems');
   List<Map<String, dynamic>> cartItems = [];
-  double totalPrice = 0.0; // Store total price
+  double totalPrice = 0.0;
 
   @override
   void initState() {
     super.initState();
     _fetchCartItems();
-    _calculateTotalPrice();
   }
 
-  void _fetchCartItems() {
-    _cartRef.onValue.listen((event) {
-      if (event.snapshot.value != null) {
-        Map<dynamic, dynamic> cartData = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-        List<Map<String, dynamic>> newCartItems = [];
+  // 🔹 Fetch Cart Items from Firebase
+  void _fetchCartItems() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-        cartData.forEach((key, value) {
-          newCartItems.add({
-            'key': key,
-            'name': value['name'],
-            'price': double.tryParse(value['price'].toString()) ?? 0.0,
-            'day': value['day'],
-            'image': value['image'],
+    String userEmail = user.email ?? "";
+    DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('users');
+    DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('cartItems');
+
+    // 🔹 Find the User ID from `users` table using Email
+    usersRef.orderByChild("email").equalTo(userEmail).once().then((event) {
+      final dataSnapshot = event.snapshot;
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> userData = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        userData.forEach((key, value) {
+          String userId = value['id'].toString();
+          cartRef.child(userId).once().then((cartSnapshot) {
+            final cartData = cartSnapshot.snapshot.value;
+            if (cartData != null) {
+              Map<dynamic, dynamic> cartItemsMap = Map<dynamic, dynamic>.from(cartData as Map);
+              setState(() {
+                cartItems = cartItemsMap.values.map((item) {
+                  return {
+                    'name': item['name'],
+                    'day': item['day'],
+                    'price': item['price'],
+                    'image': item['image'],
+                    'key': cartItemsMap.keys.firstWhere((k) => cartItemsMap[k] == item), // Store the key
+                  };
+                }).toList();
+
+                // Calculate the total price
+                totalPrice = cartItems.fold(0.0, (sum, item) {
+                  return sum + double.parse(item['price']);
+                });
+              });
+            }
           });
         });
+      }
+    });
+  }
 
-        setState(() {
-          cartItems = newCartItems;
-        });
+  // 🔹 Handle Delete Item from Cart
+  void _deleteItem(String itemKey) async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-        _calculateTotalPrice();
-      } else {
-        setState(() {
-          cartItems = [];
-          totalPrice = 0.0;
+    String userEmail = user.email ?? "";
+    DatabaseReference usersRef = FirebaseDatabase.instance.ref().child('users');
+    DatabaseReference cartRef = FirebaseDatabase.instance.ref().child('cartItems');
+
+    // 🔹 Find the User ID from `users` table using Email
+    usersRef.orderByChild("email").equalTo(userEmail).once().then((event) {
+      final dataSnapshot = event.snapshot;
+      if (dataSnapshot.value != null) {
+        Map<dynamic, dynamic> userData = Map<dynamic, dynamic>.from(dataSnapshot.value as Map);
+        userData.forEach((key, value) {
+          String userId = value['id'].toString();
+
+          // 🔹 Delete the item from `cartItems/{userId}/{itemKey}`
+          cartRef.child(userId).child(itemKey).remove().then((_) {
+            setState(() {
+              cartItems.removeWhere((item) => item['key'] == itemKey);  // Remove item from the list
+              totalPrice = cartItems.fold(0.0, (sum, item) {
+                return sum + double.parse(item['price']);
+              });
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Item deleted from cart'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }).catchError((error) {
+            print("Failed to delete item: $error");
+          });
         });
       }
     });
   }
 
-  void _calculateTotalPrice() {
-    _cartRef.onValue.listen((event) {
-      double newTotal = 0.0;
-
-      if (event.snapshot.value != null) {
-        Map<dynamic, dynamic> cartData = Map<dynamic, dynamic>.from(event.snapshot.value as Map);
-        cartData.forEach((key, value) {
-          newTotal += double.tryParse(value['price'].toString()) ?? 0.0;
-        });
-      }
-
-      setState(() {
-        totalPrice = newTotal;
-      });
-    });
-  }
-
-  void _removeFromCart(String itemKey) {
-    _cartRef.child(itemKey).remove();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Item removed from cart"), backgroundColor: Colors.red),
+  // 🔹 Handle Payment
+  void _handlePayment() {
+    // Implement your payment processing logic here
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Payment Processing'),
+        content: Text('Your payment has been successfully processed!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Navigate to a confirmation or success page
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -77,131 +126,146 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Your Cart",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white,
-          ),
-        ),
+        title: Text('Cart', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 22)),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple.shade900,
+        backgroundColor: Colors.deepPurple,
       ),
       body: cartItems.isEmpty
-          ? Center(
-        child: Text(
-          "Your cart is empty!",
-          style: GoogleFonts.poppins(fontSize: 18, color: Colors.grey),
-        ),
-      )
-          : ListView.builder(
-        itemCount: cartItems.length,
-        itemBuilder: (context, index) {
-          final item = cartItems[index];
-          return Card(
-            margin: EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 5,
-            child: ListTile(
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: item['image'] != null && item['image'].isNotEmpty
-                    ? (item['image'].startsWith('assets/')
-                    ? Image.asset(
-                  item['image'],
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
-                  },
-                )
-                    : Image.network(
-                  item['image'],
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.image_not_supported, size: 50, color: Colors.grey);
-                  },
-                ))
-                    : Icon(Icons.image, size: 50, color: Colors.grey),
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          // 🔹 Cart Items List
+          Expanded(
+            child: ListView.builder(
+              itemCount: cartItems.length,
+              itemBuilder: (context, index) {
+                final item = cartItems[index];
+                return CartItemWidget(
+                  item: item,
+                  onDelete: () => _deleteItem(item['key']),  // Pass the key for deletion
+                );
+              },
+            ),
+          ),
+          // 🔹 Total Price Display
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Price:',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '₹${totalPrice.toStringAsFixed(2)}',  // Display total price with 2 decimals
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 🔹 Payment Button
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, 'payment');
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                backgroundColor: Colors.deepPurple,
+                elevation: 8,
               ),
-              title: Text(
-                item['name'],
-                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                "₹${item['price']} - ${item['day']}",
-                style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[700]),
-              ),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => _removeFromCart(item['key']),
+              child: Text(
+                'Proceed to Payment',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
-      bottomNavigationBar: cartItems.isNotEmpty
-          ? Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 8, spreadRadius: 2),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    );
+  }
+}
+
+class CartItemWidget extends StatelessWidget {
+  final Map<String, dynamic> item;
+  final VoidCallback onDelete;
+
+  CartItemWidget({required this.item, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Total Price Display
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                item['image'],
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 12),
+            // Item Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Total Price:",
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+                    item['name'],
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  SizedBox(height: 4),
                   Text(
-                    "₹${totalPrice.toStringAsFixed(2)}",
-                    style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                    item['day'] != "N/A" ? 'Available on: ${item['day']}' : 'Available every day',
+                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '₹${item['price']}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),
             ),
-
-            // Payment Button with Navigation
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, 'payment'); // Navigate to 'sub' screen
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                backgroundColor: Colors.deepPurple.shade900,
-              ),
-              child: Center(
-                child: Text(
-                  "Payment",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,  // Calls the delete function passed from CartPage
             ),
           ],
         ),
-      )
-          : null,
+      ),
     );
   }
 }
