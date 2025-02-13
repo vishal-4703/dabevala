@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:animate_do/animate_do.dart';  // For animations
 
 class CartPage extends StatefulWidget {
   @override
@@ -101,27 +102,6 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
-  // 🔹 Handle Payment
-  void _handlePayment() {
-    // Implement your payment processing logic here
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Payment Processing'),
-        content: Text('Your payment has been successfully processed!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to a confirmation or success page
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,73 +110,108 @@ class _CartPageState extends State<CartPage> {
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
       ),
-      body: cartItems.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          // 🔹 Cart Items List
-          Expanded(
-            child: ListView.builder(
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final item = cartItems[index];
-                return CartItemWidget(
-                  item: item,
-                  onDelete: () => _deleteItem(item['key']),  // Pass the key for deletion
-                );
-              },
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.purpleAccent, Colors.deepPurple],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          // 🔹 Total Price Display
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total Price:',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  '₹${totalPrice.toStringAsFixed(2)}',  // Display total price with 2 decimals
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ],
+        ),
+        child: cartItems.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+          children: [
+            // 🔹 Cart Items List with Animations
+            Expanded(
+              child: ListView.builder(
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+                  return FadeInUp(
+                    delay: Duration(milliseconds: 100 * index),
+                    child: CartItemWidget(
+                      item: item,
+                      onDelete: () => _deleteItem(item['key']),  // Pass the key for deletion
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          // 🔹 Payment Button
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, 'payment');
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                shape: RoundedRectangleBorder(
+            // 🔹 Total Price Display with Gradient and Animation
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange, Colors.purple],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 5,
+                    ),
+                  ],
                 ),
-                backgroundColor: Colors.deepPurple,
-                elevation: 8,
-              ),
-              child: Text(
-                'Proceed to Payment',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total Price:',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    FadeInRight(
+                      delay: Duration(milliseconds: 500),
+                      child: Text(
+                        '₹${totalPrice.toStringAsFixed(2)}',  // Display total price with 2 decimals
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            // 🔹 Payment Button with Hover Effect and Animation
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, 'payment');
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.deepPurple,
+                  elevation: 8,
+                  shadowColor: Colors.black.withOpacity(0.3),
+                ),
+                child: Text(
+                  'Proceed to Payment',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -213,13 +228,13 @@ class CartItemWidget extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
+      elevation: 8,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
+            // Image with rounded corners
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
@@ -230,7 +245,7 @@ class CartItemWidget extends StatelessWidget {
               ),
             ),
             SizedBox(width: 12),
-            // Item Details
+            // Item Details with subtle shadow
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,12 +268,13 @@ class CartItemWidget extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      color: Colors.blue,
                     ),
                   ),
                 ],
               ),
             ),
+            // Delete Button with animated effect
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red),
               onPressed: onDelete,  // Calls the delete function passed from CartPage

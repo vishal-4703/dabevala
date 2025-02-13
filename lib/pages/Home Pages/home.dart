@@ -3,7 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class FoodGoHomePage extends StatelessWidget {
-  final DatabaseReference _foodRef = FirebaseDatabase.instance.ref('foodItems');  // Firebase reference
+  final DatabaseReference _foodRef = FirebaseDatabase.instance.ref('cartiteam');  // Firebase reference
 
   @override
   Widget build(BuildContext context) {

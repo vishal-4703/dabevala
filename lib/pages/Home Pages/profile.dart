@@ -172,6 +172,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       buildMenuItem(context, Icons.lock, 'Password Update', null, () {
                         Navigator.pushNamed(context, 'forgetpassword');
                       }),
+                      buildMenuItem(context, Icons.shopping_cart, 'shopping cart', null, () {
+                        Navigator.pushNamed(context, 'CartPage');
+                      }),
                       buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', null, () {
                         Navigator.pushNamed(context, 'realtime');
                       }),

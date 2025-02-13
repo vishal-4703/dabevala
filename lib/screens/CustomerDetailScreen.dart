@@ -5,6 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/services.dart';
 import '../models/customer.dart';
+import 'CartItemsScreen.dart';
 
 class CustomerDetailScreen extends StatelessWidget {
   final Customer customer;
@@ -89,8 +90,8 @@ class CustomerDetailScreen extends StatelessWidget {
                             return CircularProgressIndicator();
                           } else if (snapshot.hasError || snapshot.data == false) {
                             return Text(
-                              "Animation not available",
-                              style: GoogleFonts.poppins(fontSize: 16, color: Colors.red),
+                              "Order Details",
+                              style: GoogleFonts.poppins(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold),
                             );
                           } else {
                             return Lottie.asset(
@@ -103,14 +104,23 @@ class CustomerDetailScreen extends StatelessWidget {
                       SizedBox(height: 25),
                       ZoomIn(
                         child: ElevatedButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.arrow_back_ios_new),
-                          label: Text("Back"),
+                          onPressed: () {
+                            // Navigate to the CartItemsScreen and pass the userId
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CartItemsScreen(userId: customer.id), // Pass the userId
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.arrow_forward_ios,),
+                          label: Text("Order",style: GoogleFonts.poppins(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),),
                             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 35),
                             shadowColor: Colors.blue.shade700,
+                            iconColor: Colors.white,
                             elevation: 10,
                           ),
                         ),
@@ -150,7 +160,7 @@ class GlassContainer extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(opacity),
             borderRadius: borderRadius,
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
           ),
           child: child,
         ),
