@@ -176,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Navigator.pushNamed(context, 'CartPage');
                       }),
                       buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', null, () {
-                        Navigator.pushNamed(context, 'realtime');
+                        Navigator.pushNamed(context, 'Realtime');
                       }),
                       buildMenuItem(context, Icons.payment, 'Payment', null, () {
                         Navigator.pushNamed(context, 'payment');
