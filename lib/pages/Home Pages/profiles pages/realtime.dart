@@ -3,13 +3,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
+import 'package:animate_do/animate_do.dart';
 
 class Realtime extends StatefulWidget {
   @override
   _RealtimeTrackingState createState() => _RealtimeTrackingState();
 }
 
-class _RealtimeTrackingState extends State<Realtime> {
+class _RealtimeTrackingState extends State<Realtime> with SingleTickerProviderStateMixin {
   late GoogleMapController _controller;
   final Location _location = Location();
   final DatabaseReference _database = FirebaseDatabase.instance.ref().child('delivery');
@@ -17,16 +18,18 @@ class _RealtimeTrackingState extends State<Realtime> {
 
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
-  LatLng _currentPosition = LatLng(19.0760, 72.8777); // Default: Mumbai
-  LatLng _deliveryBoyPosition = LatLng(19.0213, 72.8424); // Delivery Boy Location: Dadar
+  LatLng _currentPosition = LatLng(19.0760, 72.8777);
+  LatLng _deliveryBoyPosition = LatLng(19.0213, 72.8424);
   late StreamSubscription<LocationData> _locationSubscription;
   late StreamSubscription<DatabaseEvent> _deliveryBoySubscription;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _initializeLocationAndMap();
     _listenToDeliveryBoyLocation();
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 600));
   }
 
   void _initializeLocationAndMap() async {
@@ -63,6 +66,7 @@ class _RealtimeTrackingState extends State<Realtime> {
           _deliveryBoyPosition = newPosition;
           _updateMapAndMarker(_currentPosition);
           _updateRoute();
+          _animationController.forward(from: 0.0);
         });
       }
     });
@@ -95,18 +99,6 @@ class _RealtimeTrackingState extends State<Realtime> {
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
         ));
       });
-
-      _controller.animateCamera(CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(
-              position.latitude < _deliveryBoyPosition.latitude ? position.latitude : _deliveryBoyPosition.latitude,
-              position.longitude < _deliveryBoyPosition.longitude ? position.longitude : _deliveryBoyPosition.longitude),
-          northeast: LatLng(
-              position.latitude > _deliveryBoyPosition.latitude ? position.latitude : _deliveryBoyPosition.latitude,
-              position.longitude > _deliveryBoyPosition.longitude ? position.longitude : _deliveryBoyPosition.longitude),
-        ),
-        50,
-      ));
     }
   }
 
@@ -115,8 +107,8 @@ class _RealtimeTrackingState extends State<Realtime> {
       _polylines.clear();
       _polylines.add(Polyline(
         polylineId: PolylineId('delivery_route'),
-        color: Colors.blue,
-        width: 5,
+        color: Colors.orange,
+        width: 6,
         points: [_deliveryBoyPosition, _currentPosition],
       ));
     });
@@ -126,59 +118,66 @@ class _RealtimeTrackingState extends State<Realtime> {
   void dispose() {
     _locationSubscription.cancel();
     _deliveryBoySubscription.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Delivery Tracking', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        backgroundColor: Colors.blue,
+        title: FadeInDown(
+          child: Text('Delivery Tracking', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        backgroundColor: Colors.blueAccent,
         elevation: 0,
       ),
       body: Column(
         children: [
-          Container(
-            margin: EdgeInsets.all(12),
-            padding: EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-            ),
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.location_on, color: Colors.red, size: 30),
-                  title: Text('Current Location', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  subtitle: Text('Lat: ${_currentPosition.latitude}, Lng: ${_currentPosition.longitude}', style: TextStyle(fontSize: 14)),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ZoomIn(
+              child: Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.location_on, color: Colors.red, size: 30),
+                          SizedBox(width: 10),
+                          Text('Current Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        ],
+                      ),
+                      Text('Lat: ${_currentPosition.latitude}, Lng: ${_currentPosition.longitude}', style: TextStyle(fontSize: 14)),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.delivery_dining, color: Colors.green, size: 30),
+                          SizedBox(width: 10),
+                          Text('Delivery Boy Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        ],
+                      ),
+                      Text('Lat: ${_deliveryBoyPosition.latitude}, Lng: ${_deliveryBoyPosition.longitude}', style: TextStyle(fontSize: 14)),
+                    ],
+                  ),
                 ),
-                ListTile(
-                  leading: Icon(Icons.directions_bike, color: Colors.green, size: 30),
-                  title: Text('Delivery Boy Location (Dadar)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  subtitle: Text('Lat: ${_deliveryBoyPosition.latitude}, Lng: ${_deliveryBoyPosition.longitude}', style: TextStyle(fontSize: 14)),
-                ),
-                SizedBox(height: 10),
-                LinearProgressIndicator(value: 0.7, color: Colors.orange, backgroundColor: Colors.grey[300]),
-                SizedBox(height: 10),
-                Text('Estimated Arrival: 10-15 min', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black54)),
-              ],
+              ),
             ),
           ),
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+            child: SlideInUp(
               child: GoogleMap(
                 initialCameraPosition: CameraPosition(target: _currentPosition, zoom: 12),
-                mapType: MapType.normal,
+                mapType: MapType.terrain,
                 onMapCreated: (controller) => _controller = controller,
                 markers: _markers,
                 polylines: _polylines,
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false,
-                compassEnabled: true,
               ),
             ),
           ),

@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
         'SubscriptionDetailsPage': (context) => SubscriptionDetailsPage(),
         'MenuPage': (context) => MenuPage(),
         'logout': (context) => logout(),
-        'ProfilePage': (context) => ProfilePage(),
+        //'ProfilePage': (context) => ProfilePage(),
         'payment': (context) => payment(),
         'chicken': (context) => chicken(),
         'vegnoodle': (context) => vegnoodle(),
@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         'first': (context) => first(),
         'second': (context) => second(),
         'third': (context) => third(),
-        'realtime': (context) => Realtime(),
+        'Realtime': (context) => Realtime(),
       },
       debugShowCheckedModeBanner: false,
     );
