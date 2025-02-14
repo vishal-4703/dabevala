@@ -13,20 +13,19 @@ class _LoginState extends State<login> {
   final TextEditingController passwordController = TextEditingController();
   bool _obscureText = true;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image
           Positioned.fill(
             child: Image.asset(
               'assets/dabba.jpg',
-              fit: BoxFit.cover, // Ensure the image covers the entire screen
+              fit: BoxFit.cover,
             ),
           ),
-          // Animated Welcome Text
           Positioned(
             top: 100,
             left: 50,
@@ -56,7 +55,6 @@ class _LoginState extends State<login> {
               repeatForever: true,
             ),
           ),
-          // Main content
           Center(
             child: SingleChildScrollView(
               child: Padding(
@@ -64,11 +62,8 @@ class _LoginState extends State<login> {
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 200), // Adjust spacing
-                      // Email Input Field
+                      SizedBox(height: 200),
                       TextFormField(
                         controller: emailController,
                         style: TextStyle(color: Colors.white),
@@ -97,7 +92,6 @@ class _LoginState extends State<login> {
                         },
                       ),
                       SizedBox(height: 30),
-                      // Password Input Field
                       TextFormField(
                         controller: passwordController,
                         style: TextStyle(color: Colors.white),
@@ -135,53 +129,52 @@ class _LoginState extends State<login> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 40),
-                      // Login Button
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: double.infinity,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(30),
-                            gradient: LinearGradient(
-                              colors: [Colors.blue, Colors.purple],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(color: Colors.red, fontSize: 16),
                           ),
-                          child: TextButton(
-                            onPressed: () async {
-                              if (_formKey.currentState!.validate()) {
-                                if (emailController.text == 'admin@gmail.com' &&
-                                    passwordController.text == 'admin12345') {
-                                  Navigator.pushNamed(context, 'DashboardScreen');
-                                } else {
-                                  try {
-                                    UserCredential userCredential =
-                                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                                      email: emailController.text,
-                                      password: passwordController.text,
-                                    );
-                                    Navigator.pushNamed(context, 'FoodDeliveryScreen');
-                                  } on FirebaseAuthException catch (e) {
-                                    // Handle error
-                                  }
-                                }
+                        ),
+                      SizedBox(height: 40),
+                      Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: LinearGradient(
+                            colors: [Colors.blue, Colors.purple],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: TextButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              try {
+                                await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                );
+                                Navigator.pushNamed(context, 'FoodDeliveryScreen');
+                              } on FirebaseAuthException catch (e) {
+                                setState(() {
+                                  _errorMessage = e.message;
+                                });
                               }
-                            },
-                            child: Text(
-                              'Login',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
+                            }
+                          },
+                          child: Text(
+                            'Login',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
                             ),
                           ),
                         ),
                       ),
                       SizedBox(height: 30),
-                      // Signup and Forgot Password Links
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
