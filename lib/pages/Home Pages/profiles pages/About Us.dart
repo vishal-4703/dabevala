@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutUsPage extends StatefulWidget {
   @override
@@ -58,7 +59,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                   padding: const EdgeInsets.all(20.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Color.fromRGBO(255, 255, 255, 0.2), // Updated
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
@@ -67,7 +68,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                           spreadRadius: 3,
                         ),
                       ],
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      border: Border.all(color: Color.fromRGBO(255, 255, 255, 0.3)), // Updated
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(25),
@@ -97,18 +98,18 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.poppins(
                                     fontSize: 18,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Color.fromRGBO(255, 255, 255, 0.9), // Updated
                                   ),
                                 ),
                               ),
                               SizedBox(height: 20),
-                              Divider(color: Colors.white.withOpacity(0.5)),
+                              Divider(color: Color.fromRGBO(255, 255, 255, 0.5)), // Updated
                               SizedBox(height: 15),
                               FadeInLeft(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white),
+                                    Icon(FontAwesomeIcons.locationDot, color: Colors.white), // Updated
                                     SizedBox(width: 8),
                                     Text(
                                       'Mumbai, India',
@@ -125,10 +126,10 @@ class _AboutUsPageState extends State<AboutUsPage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(FontAwesomeIcons.phoneAlt, color: Colors.white),
+                                    Icon(FontAwesomeIcons.phoneFlip, color: Colors.white), // Updated
                                     SizedBox(width: 8),
                                     Text(
-                                      '+91 9876543210',
+                                      '+91 7738395822',
                                       style: GoogleFonts.poppins(
                                         fontSize: 18,
                                         color: Colors.white,
@@ -141,12 +142,20 @@ class _AboutUsPageState extends State<AboutUsPage> {
                               JelloIn(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white.withOpacity(0.3),
+                                    backgroundColor: Color.fromRGBO(255, 255, 255, 0.3), // Updated
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    const phoneNumber = 'tel:+917738395822';
+                                    final Uri phoneUri = Uri.parse(phoneNumber); // Updated
+                                    if (await canLaunchUrl(phoneUri)) { // Updated
+                                      await launchUrl(phoneUri); // Updated
+                                    } else {
+                                      throw 'Could not launch $phoneNumber';
+                                    }
+                                  },
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 25),
                                     child: Text(
