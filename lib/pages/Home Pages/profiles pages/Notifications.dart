@@ -4,13 +4,6 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: NotificationsPage(),
-  ));
-}
-
 class NotificationsPage extends StatefulWidget {
   @override
   _NotificationsPageState createState() => _NotificationsPageState();

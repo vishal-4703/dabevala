@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'cart_page.dart';
+import '../cart_page.dart';
+
 
 class NextPage extends StatelessWidget {
   final String itemName;

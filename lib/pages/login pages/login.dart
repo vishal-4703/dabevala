@@ -22,7 +22,7 @@ class _LoginState extends State<login> {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'assets/dabba.jpg',
+              'assets/login.jpg',
               fit: BoxFit.cover,
             ),
           ),
@@ -32,7 +32,7 @@ class _LoginState extends State<login> {
             child: AnimatedTextKit(
               animatedTexts: [
                 TypewriterAnimatedText(
-                  'Welcome Back\n Online \nDabbawala System.....',
+                  '\n Hello..',
                   textStyle: GoogleFonts.poppins(
                     fontSize: 34,
                     foreground: Paint()
@@ -66,21 +66,21 @@ class _LoginState extends State<login> {
                       SizedBox(height: 200),
                       TextFormField(
                         controller: emailController,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.black),
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.email, color: Colors.white),
+                          prefixIcon: Icon(Icons.email, color: Colors.black),
                           hintText: "Enter your email",
-                          hintStyle: TextStyle(color: Colors.white),
+                          hintStyle: TextStyle(color: Colors.black),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Colors.black),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
+                          fillColor: Colors.black.withOpacity(0.1),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -94,14 +94,14 @@ class _LoginState extends State<login> {
                       SizedBox(height: 30),
                       TextFormField(
                         controller: passwordController,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(color: Colors.black),
                         obscureText: _obscureText,
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock, color: Colors.white),
+                          prefixIcon: Icon(Icons.lock, color: Colors.black),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureText ? Icons.visibility_off : Icons.visibility,
-                              color: Colors.white,
+                              color: Colors.black,
                             ),
                             onPressed: () {
                               setState(() {
@@ -110,17 +110,17 @@ class _LoginState extends State<login> {
                             },
                           ),
                           hintText: "Enter your password",
-                          hintStyle: TextStyle(color: Colors.white),
+                          hintStyle: TextStyle(color: Colors.black),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: Colors.white),
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(color: Colors.black),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(color: Colors.blue),
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
+                          fillColor: Colors.black.withOpacity(0.1),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -139,12 +139,12 @@ class _LoginState extends State<login> {
                         ),
                       SizedBox(height: 40),
                       Container(
-                        width: double.infinity,
+                        width: 150,
                         height: 50,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(10),
                           gradient: LinearGradient(
-                            colors: [Colors.blue, Colors.purple],
+                            colors: [Colors.yellow, Colors.deepOrange],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -168,7 +168,7 @@ class _LoginState extends State<login> {
                           child: Text(
                             'Login',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 18,
                             ),
                           ),
@@ -186,7 +186,7 @@ class _LoginState extends State<login> {
                               'Signup',
                               style: TextStyle(
                                 decoration: TextDecoration.underline,
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 18,
                               ),
                             ),
@@ -199,7 +199,7 @@ class _LoginState extends State<login> {
                               'Forgot Password',
                               style: TextStyle(
                                 decoration: TextDecoration.underline,
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 18,
                               ),
                             ),

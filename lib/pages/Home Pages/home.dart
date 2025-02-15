@@ -1,193 +1,167 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:your_project_name/pages/Home%20Pages/subscription.dart'; // Import the sub page
+import 'profile.dart'; // Import the profile page
+import 'cart_page.dart'; // Import the cart page
 
-class FoodGoHomePage extends StatelessWidget {
-  final DatabaseReference _foodRef = FirebaseDatabase.instance.ref('MenuItems');  // Firebase reference
+class FoodGoHomePage extends StatefulWidget {
+  @override
+  _FoodGoHomePageState createState() => _FoodGoHomePageState();
+}
+
+class _FoodGoHomePageState extends State<FoodGoHomePage> {
+  int _selectedIndex = 0; // Track selected tab index
+
+  // List of pages for navigation
+  static final List<Widget> _pages = [
+    HomeContent(),
+    sub(), // Subscription page
+    CartPage(), // Cart page
+    ProfilePage(), // Profile page
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('DABBAWALA'),
+        automaticallyImplyLeading: false, // Remove the back arrow
+        title: Text(
+          'DABBAWALA',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.orangeAccent,
         actions: [
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, 'ProfilePage');
+              Navigator.pushNamed(context, '/profile'); // Navigate to ProfilePage
             },
             child: CircleAvatar(
               backgroundImage: AssetImage('assets/profile.jpg'),
-              radius: 40,
+              radius: 20,
             ),
+          ),
+          SizedBox(width: 10),
+        ],
+      ),
+      body: _pages[_selectedIndex], // Display selected page
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, 'MenuPage');
+        },
+        child: Icon(Icons.fastfood, color: Colors.deepPurple),
+        backgroundColor: Colors.orangeAccent,
+        elevation: 5,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: _buildAnimatedBottomNavigationBar(),
+    );
+  }
+
+  // 🔹 Enhanced Bottom Navigation Bar with Animations
+  Widget _buildAnimatedBottomNavigationBar() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.white, Colors.white30],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            spreadRadius: 5,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildHeader(),
-              SizedBox(height: 25),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search for dishes, tiffin providers...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                "Today's Offers",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              buildCarouselSlider(context),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(width: 10, height: 120),
-                  Expanded(
-                    flex: 2,
-                    child: CategoryButton(
-                      label: "Non Veg",
-                      onSelected: (_) {
-                        Navigator.pushNamed(context, 'nonveg');
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 1),
-              Text(
-                'Popular',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              SizedBox(
-                height: 200,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    PopularCard(
-                      title: 'Chicken Biryani',
-                      description: 'Delicious Biryani',
-                      rating: 4.8,
-                      imageUrl: 'assets/biryani.png',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'biryani');
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    PopularCard(
-                      title: 'Chicken',
-                      description: 'Tasty Chicken',
-                      rating: 4.3,
-                      imageUrl: 'assets/chicken.png',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'chicken');
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    PopularCard(
-                      title: 'SahiPanner',
-                      description: 'Creamy and delicious',
-                      rating: 4.5,
-                      imageUrl: 'assets/sahipanir.png',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'sahipanner');
-                      },
-                    ),
-                    SizedBox(width: 10),
-                    PopularCard(
-                      title: 'Veg Noodle',
-                      description: 'Tasty lentil dish',
-                      rating: 4.2,
-                      imageUrl: 'assets/veg noodle.jpeg',
-                      onPressed: () {
-                        Navigator.pushNamed(context, 'vegnoodle');
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Special Dish',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              NearYouCard(
-                title: 'Paneer',
-                description: 'North Indian meals made using home-style recipes',
-                rating: 4.2,
-                tags: ['Veg', 'North Indian', 'Earth'],
-                imageUrl: 'assets/panner.jpeg',
-                onPressed: () {
-                  Navigator.pushNamed(context, 'panner');
-                },
-              ),
-              SizedBox(height: 10),
-              NearYouCard(
-                title: 'Dal Masala',
-                description: 'Explore the taste of South Indian Cuisines',
-                rating: 3.8,
-                tags: ['Veg', 'South Indian', 'Earth'],
-                imageUrl: 'assets/dalmasala.png',
-                onPressed: () {
-                  Navigator.pushNamed(context, 'dal');
-                },
-              ),
-              SizedBox(height: 10),
-              NearYouCard(
-                title: 'SahiPanner',
-                description: 'Explore the taste of South Indian Cuisines',
-                rating: 3.8,
-                tags: ['Veg', 'South Indian', 'Earth'],
-                imageUrl: 'assets/sahipanir.png',
-                onPressed: () {
-                  Navigator.pushNamed(context, 'sahipanner');
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
+      child: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
+        color: Colors.transparent,
+        elevation: 0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: Icon(Icons.home, color: Colors.blue, size: 40),
-              onPressed: () {
-                Navigator.pushNamed(context, 'FoodGoHomePage');
-              },
+            _buildNavItem(Icons.home, 0, _selectedIndex, _onItemTapped),
+            _buildNavItem(Icons.card_membership, 1, _selectedIndex, _onItemTapped),
+            SizedBox(width: 40), // Space for FAB
+            _buildNavItem(Icons.shopping_cart, 2, _selectedIndex, _onItemTapped),
+            _buildNavItem(Icons.person, 3, _selectedIndex, _onItemTapped),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🔹 Build Navigation Item with Animations
+  Widget _buildNavItem(IconData icon, int index, int selectedIndex, Function(int) onItemTapped) {
+    bool isSelected = selectedIndex == index;
+
+    return InkWell(
+      onTap: () => onItemTapped(index),
+      splashColor: Colors.white.withOpacity(0.2), // Ripple effect
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.deepOrange : Colors.black.withOpacity(0.6),
+              size: isSelected ? 30 : 24,
             ),
-            IconButton(
-              icon: Icon(Icons.fastfood, color: Colors.grey, size: 40),
-              onPressed: () {
-                Navigator.pushNamed(context, 'MenuPage');
-              },
-            ),
-            SizedBox(width: 30),
-            IconButton(
-              icon: Icon(Icons.card_membership, color: Colors.grey, size: 40),
-              onPressed: () {
-                Navigator.pushNamed(context, 'sub');
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.person, color: Colors.grey, size: 40),
-              onPressed: () {
-                Navigator.pushNamed(context, 'ProfilePage');
-              },
-            ),
+            if (isSelected)
+              Container(
+                margin: EdgeInsets.only(top: 4),
+                height: 5,
+                width: 5,
+                decoration: BoxDecoration(
+                  color: Colors.deepOrange,
+                  shape: BoxShape.circle,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Home Content
+class HomeContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildHeader(),
+            SizedBox(height: 25),
+            buildSearchBar(),
+            SizedBox(height: 20),
+            buildCarouselSlider(context),
+            SizedBox(height: 20),
+            buildPopularSection(context),
+            SizedBox(height: 20),
+            buildSpecialDishesSection(context),
           ],
         ),
       ),
@@ -211,8 +185,18 @@ class FoodGoHomePage extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.blueAccent,
+            gradient: LinearGradient(
+              colors: [Colors.orangeAccent, Colors.deepOrange],
+            ),
             borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withAlpha(150),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,6 +210,21 @@ class FoodGoHomePage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget buildSearchBar() {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: 'Search for dishes, tiffin providers...',
+        prefixIcon: Icon(Icons.search, color: Colors.grey),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Colors.grey[200],
+      ),
     );
   }
 
@@ -278,48 +277,113 @@ class FoodGoHomePage extends StatelessWidget {
     );
   }
 
-  Future<List<FoodItem>> getFoodItems() async {
-    try {
-      final snapshot = await _foodRef.get();
-      final data = snapshot.value;
-
-      // Ensure that the data is not null and is of the type Map
-      if (data != null && data is Map<dynamic, dynamic>) {
-        List<FoodItem> foodItems = [];
-        Map<dynamic, dynamic> mapData = Map<dynamic, dynamic>.from(data);
-
-        // Iterate through the map and add FoodItem objects to the list
-        mapData.forEach((key, value) {
-          foodItems.add(FoodItem.fromMap(Map<String, dynamic>.from(value)));
-        });
-
-        return foodItems;
-      }
-
-      return [];
-    } catch (e) {
-      print('Error fetching food items: $e');
-      return [];
-    }
+  Widget buildPopularSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Popular',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        SizedBox(
+          height: 200,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              PopularCard(
+                title: 'Chicken Biryani',
+                description: 'Delicious Biryani',
+                rating: 4.8,
+                imageUrl: 'assets/biryani.png',
+                onPressed: () {
+                  Navigator.pushNamed(context, 'biryani');
+                },
+              ),
+              SizedBox(width: 10),
+              PopularCard(
+                title: 'Chicken',
+                description: 'Tasty Chicken',
+                rating: 4.3,
+                imageUrl: 'assets/chicken.png',
+                onPressed: () {
+                  Navigator.pushNamed(context, 'chicken');
+                },
+              ),
+              SizedBox(width: 10),
+              PopularCard(
+                title: 'SahiPanner',
+                description: 'Creamy and delicious',
+                rating: 4.5,
+                imageUrl: 'assets/sahipanir.png',
+                onPressed: () {
+                  Navigator.pushNamed(context, 'sahipanner');
+                },
+              ),
+              SizedBox(width: 10),
+              PopularCard(
+                title: 'Veg Noodle',
+                description: 'Tasty lentil dish',
+                rating: 4.2,
+                imageUrl: 'assets/veg noodle.jpeg',
+                onPressed: () {
+                  Navigator.pushNamed(context, 'vegnoodle');
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
-}
 
-class FoodItem {
-  final String name;
-  final String description;
-  final double price;
-
-  FoodItem({required this.name, required this.description, required this.price});
-
-  factory FoodItem.fromMap(Map<String, dynamic> map) {
-    return FoodItem(
-      name: map['name'],
-      description: map['description'],
-      price: map['price'],
+  Widget buildSpecialDishesSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Special Dish',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        NearYouCard(
+          title: 'Paneer',
+          description: 'North Indian meals made using home-style recipes',
+          rating: 4.2,
+          tags: ['Veg', 'North Indian', 'Earth'],
+          imageUrl: 'assets/panner.jpeg',
+          onPressed: () {
+            Navigator.pushNamed(context, 'panner');
+          },
+        ),
+        SizedBox(height: 10),
+        NearYouCard(
+          title: 'Dal Masala',
+          description: 'Explore the taste of South Indian Cuisines',
+          rating: 3.8,
+          tags: ['Veg', 'South Indian', 'Earth'],
+          imageUrl: 'assets/dalmasala.png',
+          onPressed: () {
+            Navigator.pushNamed(context, 'dal');
+          },
+        ),
+        SizedBox(height: 10),
+        NearYouCard(
+          title: 'SahiPanner',
+          description: 'Explore the taste of South Indian Cuisines',
+          rating: 3.8,
+          tags: ['Veg', 'South Indian', 'Earth'],
+          imageUrl: 'assets/sahipanir.png',
+          onPressed: () {
+            Navigator.pushNamed(context, 'sahipanner');
+          },
+        ),
+      ],
     );
   }
 }
 
+// Define OfferCard widget
 class OfferCard extends StatelessWidget {
   final String discount;
   final String description;
@@ -340,8 +404,8 @@ class OfferCard extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 300, // Fixed width for uniformity
-        height: 200, // Fixed height for uniformity
+        width: 300,
+        height: 200,
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: color,
@@ -370,16 +434,17 @@ class OfferCard extends StatelessWidget {
   }
 }
 
+// Define CategoryButton widget
 class CategoryButton extends StatelessWidget {
   final String label;
-  final ValueChanged<void> onSelected;
+  final VoidCallback onPressed;
 
-  CategoryButton({required this.label, required this.onSelected});
+  CategoryButton({required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => onSelected(null),
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey[200],
         shape: RoundedRectangleBorder(
@@ -394,6 +459,7 @@ class CategoryButton extends StatelessWidget {
   }
 }
 
+// Define PopularCard widget
 class PopularCard extends StatelessWidget {
   final String title;
   final String description;
@@ -429,6 +495,7 @@ class PopularCard extends StatelessWidget {
   }
 }
 
+// Define NearYouCard widget
 class NearYouCard extends StatelessWidget {
   final String title;
   final String description;

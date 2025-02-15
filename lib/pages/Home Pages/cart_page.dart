@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:animate_do/animate_do.dart';  // For animations
+import 'package:animate_do/animate_do.dart'; // For animations
 
 class CartPage extends StatefulWidget {
   @override
@@ -82,7 +82,7 @@ class _CartPageState extends State<CartPage> {
           // 🔹 Delete the item from `cartItems/{userId}/{itemKey}`
           cartRef.child(userId).child(itemKey).remove().then((_) {
             setState(() {
-              cartItems.removeWhere((item) => item['key'] == itemKey);  // Remove item from the list
+              cartItems.removeWhere((item) => item['key'] == itemKey); // Remove item from the list
               totalPrice = cartItems.fold(0.0, (sum, item) {
                 return sum + double.parse(item['price']);
               });
@@ -106,20 +106,28 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cart', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 22)),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        automaticallyImplyLeading: false,
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Cart',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 22),
+          ),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.purpleAccent, Colors.deepPurple],
+            colors: [Colors.white, Colors.white54],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: cartItems.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+          child: CircularProgressIndicator(),
+        )
             : Column(
           children: [
             // 🔹 Cart Items List with Animations
@@ -132,7 +140,7 @@ class _CartPageState extends State<CartPage> {
                     delay: Duration(milliseconds: 100 * index),
                     child: CartItemWidget(
                       item: item,
-                      onDelete: () => _deleteItem(item['key']),  // Pass the key for deletion
+                      onDelete: () => _deleteItem(item['key']), // Pass the key for deletion
                     ),
                   );
                 },
@@ -145,7 +153,7 @@ class _CartPageState extends State<CartPage> {
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange, Colors.purple],
+                    colors: [Colors.black12, Colors.white],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -172,7 +180,7 @@ class _CartPageState extends State<CartPage> {
                     FadeInRight(
                       delay: Duration(milliseconds: 500),
                       child: Text(
-                        '₹${totalPrice.toStringAsFixed(2)}',  // Display total price with 2 decimals
+                        '₹${totalPrice.toStringAsFixed(2)}', // Display total price with 2 decimals
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -196,7 +204,7 @@ class _CartPageState extends State<CartPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.grey,
                   elevation: 8,
                   shadowColor: Colors.black.withOpacity(0.3),
                 ),
@@ -277,7 +285,7 @@ class CartItemWidget extends StatelessWidget {
             // Delete Button with animated effect
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: onDelete,  // Calls the delete function passed from CartPage
+              onPressed: onDelete, // Calls the delete function passed from CartPage
             ),
           ],
         ),

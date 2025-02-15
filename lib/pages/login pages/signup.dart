@@ -83,7 +83,7 @@ class _SignupState extends State<signup> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/sig1.jpg'),
+                image: AssetImage('assets/Screenshot 2025-02-15 135741.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -104,22 +104,22 @@ class _SignupState extends State<signup> {
                     fontSize: 34,
                     foreground: Paint()
                       ..shader = LinearGradient(
-                        colors: [Colors.blue, Colors.purple],
+                        colors: [Colors.yellow, Colors.deepOrange],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                    shadows: [
-                      Shadow(
-                        blurRadius: 5.0,
-                        color: Colors.black.withOpacity(0.5),
-                        offset: Offset(3.0, 3.0),
-                      ),
-                    ],
+                    // shadows: [
+                    //   Shadow(
+                    //     blurRadius: 5.0,
+                    //     color: Colors.black.withOpacity(0.5),
+                    //     //offset: Offset(3.0, 3.0),
+                    //   ),
+                    //],
                   ),
-                  speed: Duration(milliseconds: 150),
+                 // speed: Duration(milliseconds: 150),
                 ),
               ],
-              repeatForever: true,
+              repeatForever: false,
             ),
           ),
 
@@ -162,7 +162,7 @@ class _SignupState extends State<signup> {
                     ElevatedButton(
                       onPressed: _isLoading ? null : _signUp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
+                        backgroundColor: Colors.deepOrange,
                         padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),

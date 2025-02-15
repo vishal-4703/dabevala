@@ -8,12 +8,6 @@ import 'screens/addmenu.dart';
 import 'screens/dashboard_screen.dart';
 import 'package:your_project_name/pages/food_list_page.dart';
 import 'package:your_project_name/pages/model/food_item.dart';
-import 'pages/Home Pages/food pages/food iteam page/bangda.dart';
-import 'pages/Home Pages/food pages/food iteam page/butterchicken.dart';
-import 'pages/Home Pages/food pages/food iteam page/chicken non.dart';
-import 'pages/Home Pages/food pages/food iteam page/chickennoodles.dart';
-import 'pages/Home Pages/food pages/food iteam page/fishcurry.dart';
-import 'pages/Home Pages/food pages/food iteam page/fried fish.dart';
 import 'pages/login pages/login.dart';
 import 'pages/login pages/signup.dart';
 import 'pages/Home Pages/food pages/todays offer/10off.dart';
@@ -26,15 +20,8 @@ import 'pages/login pages/forgetpassword2.dart';
 import 'pages/Home Pages/profiles pages/logout.dart';
 import 'pages/Home Pages/logo.dart';
 import 'pages/Home Pages/home.dart';
-import 'pages/Home Pages/profile.dart';
 import 'pages/Home Pages/profiles pages/payment.dart';
-import 'pages/Home Pages/subscription.dart';
 import 'pages/Home Pages/food pages/Nonevegfood.dart';
-import 'pages/Home Pages/food pages/food iteam page/chicken.dart';
-import 'pages/Home Pages/food pages/food iteam page/vegnoodle.dart';
-import 'pages/Home Pages/food pages/food iteam page/panner.dart';
-import 'pages/Home Pages/food pages/food iteam page/dalmasala.dart';
-import 'pages/Home Pages/food pages/food iteam page/biryani.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +37,7 @@ class MyApp extends StatelessWidget {
       primarySwatch: Colors.blue, ),
       home: login(),
       routes: {
+
         'AddMenuItemPage': (context) => AddMenuItemPage(),
         'Menu': (context) => Menu(),
         'login': (context) => login(),
@@ -58,28 +46,14 @@ class MyApp extends StatelessWidget {
         'forgetpassword': (context) => forgetpassword(),
         'forgetpassword2': (context) => forgetpassword2(),
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
-        //'FoodItemScreen': (context) => FoodListPage(),
-        'nonveg': (context) => nonveg(),
+        'FoodItemScreen': (context) => FoodListPage(),
+        'NotificationsPage': (context) => NotificationsPage(),
         'AboutUsPage': (context) => AboutUsPage(),
-        'butterchicken': (context) => butterchicken(),
-        'fish': (context) => fish(),
-        'bangda': (context) => bangda(),
-        'chickennoodles': (context) => chickennoodles(),
-        'fishcurry': (context) => fishcurry(),
-        'chickennon': (context) => chickennon(),
         'FoodGoHomePage': (context) => FoodGoHomePage(),
-        'sub': (context) => sub(),
         'SubscriptionDetailsPage': (context) => SubscriptionDetailsPage(),
         'MenuPage': (context) => MenuPage(),
         'logout': (context) => logout(),
-        //'ProfilePage': (context) => ProfilePage(),
         'payment': (context) => payment(),
-        'chicken': (context) => chicken(),
-        'vegnoodle': (context) => vegnoodle(),
-        'panner': (context) => panner(),
-        'NotificationsPage': (context) => NotificationsPage(),
-        'dal': (context) => dal(),
-        'biryani': (context) => biryani(),
         'first': (context) => first(),
         'second': (context) => second(),
         'third': (context) => third(),

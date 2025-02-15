@@ -106,26 +106,21 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () {
-            Navigator.pushNamed(context, 'FoodGoHomePage');
-          },
-        ),
         title: Text(
           'Profile',
-          style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black,  fontSize: 26,fontWeight: FontWeight.bold,),
         ),
         centerTitle: true,
+        automaticallyImplyLeading: false, // Removed the back arrow
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.purpleAccent],
+            colors: [Colors.white, Colors.white60],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -146,9 +141,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundImage: _imageUrl != null
                               ? NetworkImage(_imageUrl!)
                               : AssetImage('assets/profile.jpg') as ImageProvider,
-                          child: _imageUrl == null
-                              ? Icon(Icons.camera_alt, size: 30, color: Colors.white)
-                              : null,
                         ),
                       ),
                       SizedBox(height: 20),
@@ -156,12 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       // Username
                       Text(
                         _username,
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Tap to change your profile picture',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
                       ),
                       SizedBox(height: 30),
 
@@ -171,9 +158,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       }),
                       buildMenuItem(context, Icons.lock, 'Password Update', null, () {
                         Navigator.pushNamed(context, 'forgetpassword');
-                      }),
-                      buildMenuItem(context, Icons.shopping_cart, 'shopping cart', null, () {
-                        Navigator.pushNamed(context, 'CartPage');
                       }),
                       buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', null, () {
                         Navigator.pushNamed(context, 'Realtime');
@@ -187,33 +171,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', null, () {
                         Navigator.pushNamed(context, 'AboutUsPage');
                       }),
+                      buildMenuItem(context, Icons.logout_rounded, 'About Us', null, () {
+                        Navigator.pushNamed(context, 'logout');
+                      }),
                     ],
                   ),
                 ),
               ),
             ),
-
-            // Logout Button
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, 'logout');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Text(
-                  'Log out',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
           ],
         ),
       ),
@@ -223,15 +188,15 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget buildMenuItem(BuildContext context, IconData icon, String title, [String? badge, VoidCallback? onPressed]) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-      leading: Icon(icon, color: Colors.white),
-      title: Text(title, style: TextStyle(fontSize: 18, color: Colors.white)),
+      leading: Icon(icon, color: Colors.black),
+      title: Text(title, style: TextStyle(fontSize: 18, color: Colors.black)),
       trailing: badge != null
           ? Container(
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(12)),
         child: Text(badge, style: TextStyle(color: Colors.white, fontSize: 12)),
       )
-          : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+          : Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onPressed,
     );
   }

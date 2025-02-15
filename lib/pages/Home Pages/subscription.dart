@@ -9,70 +9,68 @@ class sub extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple.shade900,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        leading: FadeInLeft(
-          child: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-
-          ),
-        ),
+        backgroundColor: Colors.white30,
+        automaticallyImplyLeading: false,
         title: FadeInDown(
           child: Text(
-            'Membership',
-            style: GoogleFonts.lato(
-              fontSize: 24,
+            'Membership Plans',
+            style: GoogleFonts.poppins(
+              fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ),
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        centerTitle: true,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: FadeInUp(
-            child: CarouselSlider(
-              options: CarouselOptions(
-                height: 500,
-                enlargeCenterPage: true,
-                enableInfiniteScroll: true,
-                autoPlay: true,
-                autoPlayInterval: Duration(seconds: 3),
-                autoPlayAnimationDuration: Duration(milliseconds: 800),
-              ),
-              items: [
-                BounceInLeft(
-                  child: _buildPricingCard(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.black87, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 60),
+            child: FadeInUp(
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: 550,
+                  enlargeCenterPage: true,
+                  enableInfiniteScroll: true,
+                  autoPlay: true,
+                  autoPlayInterval: Duration(seconds: 4),
+                  autoPlayAnimationDuration: Duration(milliseconds: 800),
+                ),
+                items: [
+                  _buildPricingCard(
                     title: 'MONTHLY',
                     price: '₹3000',
-                    color: Colors.blueAccent.shade700,
+                    color: Colors.teal.shade400,
                     features: ['Veg', 'Non Veg', 'Fast Delivery', 'Discounts'],
                     context: context,
                   ),
-                ),
-                BounceInRight(
-                  child: _buildPricingCard(
-                    title: '3 MONTH',
+                  _buildPricingCard(
+                    title: '3 MONTHS',
                     price: '₹8000',
-                    color: Colors.blueAccent,
+                    color: Colors.blueAccent.shade200,
                     features: ['Veg', 'Non Veg', 'Premium Support', 'Extra Discounts'],
                     context: context,
                   ),
-                ),
-                BounceInRight(
-                  child: _buildPricingCard(
-                    title: '6 MONTH',
+                  _buildPricingCard(
+                    title: '6 MONTHS',
                     price: '₹15,000',
-                    color: Colors.lightBlue,
+                    color: Colors.deepPurpleAccent.shade100,
                     features: ['Priority Delivery', 'Exclusive Offers', 'VIP Support'],
                     context: context,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -89,31 +87,28 @@ class sub extends StatelessWidget {
   }) {
     return ZoomIn(
       child: Container(
-        width: 320,
+        margin: EdgeInsets.symmetric(horizontal: 10),
         padding: EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.8), color],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
-              color: Colors.black38,
+              color: Colors.black.withOpacity(0.3),
               blurRadius: 15,
               offset: Offset(0, 8),
             ),
           ],
+          border: Border.all(color: Colors.white.withOpacity(0.5)),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             FadeInDown(
               child: Text(
                 title,
-                style: GoogleFonts.lato(
-                  fontSize: 30,
+                style: GoogleFonts.poppins(
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -123,23 +118,23 @@ class sub extends StatelessWidget {
             FadeInUp(
               child: Text(
                 price,
-                style: GoogleFonts.lato(
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                style: GoogleFonts.poppins(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.yellowAccent,
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 25),
             Column(
-              children: features
-                  .map(
-                    (feature) => Padding(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: features.map((feature) {
+                return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6.0),
                   child: SlideInLeft(
                     child: Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amberAccent),
+                        Icon(Icons.check_circle, color: Colors.greenAccent),
                         SizedBox(width: 10),
                         Text(
                           feature,
@@ -151,33 +146,26 @@ class sub extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              )
-                  .toList(),
+                );
+              }).toList(),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 35),
             BounceInUp(
               child: ElevatedButton(
-                onPressed: () {
-                  _saveSubscription(title, price, features, context);
-                },
+                onPressed: () => _saveSubscription(title, price, features, context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 28),
-                  shadowColor: Colors.black26,
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 ),
-                child: Pulse(
-                  infinite: true,
-                  child: Text(
-                    'SUBSCRIBE',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: Text(
+                  'SUBSCRIBE',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
