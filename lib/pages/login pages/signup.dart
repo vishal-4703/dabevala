@@ -1,9 +1,8 @@
-import 'dart:ui';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../usee_AUTH/firebase_auth_implemenation/firebase_auth_service.dart';
 
 class signup extends StatefulWidget {
@@ -49,7 +48,6 @@ class _SignupState extends State<signup> {
           newId = (snapshot.value as int) + 1;
         }
 
-        // Store new user in Firebase
         await usersRef.child(newId.toString()).set({
           'id': newId,
           'username': username,
@@ -57,11 +55,10 @@ class _SignupState extends State<signup> {
           'createdAt': DateTime.now().toIso8601String(),
         });
 
-        // Update the last used ID
         await counterRef.set(newId);
 
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Signup Successful!")));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Signup Successful!")));
         Navigator.pushNamed(context, 'login');
       }
     } on FirebaseAuthException catch (e) {
@@ -80,100 +77,124 @@ class _SignupState extends State<signup> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Screenshot 2025-02-15 135741.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
-            ),
-          ),
-
-          Positioned(
-            top: 100,
-            left: 50,
-            child: AnimatedTextKit(
-              animatedTexts: [
-                TypewriterAnimatedText(
-                  'Welcome Back Online \n Dabbawala System',
-                  textStyle: GoogleFonts.poppins(
-                    fontSize: 34,
-                    foreground: Paint()
-                      ..shader = LinearGradient(
-                        colors: [Colors.yellow, Colors.deepOrange],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                    // shadows: [
-                    //   Shadow(
-                    //     blurRadius: 5.0,
-                    //     color: Colors.black.withOpacity(0.5),
-                    //     //offset: Offset(3.0, 3.0),
-                    //   ),
-                    //],
-                  ),
-                 // speed: Duration(milliseconds: 150),
-                ),
-              ],
-              repeatForever: false,
-            ),
-          ),
-
-          Center(
+          Positioned.fill(
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.85,
-              padding: EdgeInsets.all(25),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 3,
-                  ),
-                ],
+                gradient: LinearGradient(
+                  colors: [Colors.white, Colors.white],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
-              child: Form(
-                key: _formKey,
+            ),
+          ),
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Create Account",
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                    AnimatedTextKit(
+                      animatedTexts: [
+                        WavyAnimatedText(
+                          'Join Us Today!',
+                          textStyle: GoogleFonts.poppins(
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                      isRepeatingAnimation: true,
+                      repeatForever: true,
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 30,
+                            spreadRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset('assets/logo.png', fit: BoxFit.cover),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    _buildTextField("Username", _usernameController, Icons.person, false),
-                    SizedBox(height: 15),
-                    _buildTextField("Email", _emailController, Icons.email, false),
-                    SizedBox(height: 15),
-                    _buildTextField("Password", _passwordController, Icons.lock, true),
-                    SizedBox(height: 25),
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _signUp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    const SizedBox(height: 30),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          _buildTextField("Username", _usernameController, Icons.person, false),
+                          const SizedBox(height: 20),
+                          _buildTextField("Email Address", _emailController, Icons.email, false),
+                          const SizedBox(height: 20),
+                          _buildTextField("Password", _passwordController, Icons.lock_outline, true),
+                          const SizedBox(height: 30),
+                          GestureDetector(
+                            onTap: _isLoading ? null : _signUp,
+                            child: Container(
+                              width: 200,
+                              height: 55,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.teal.shade700,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 20,
+                                    offset: const Offset(5, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: _isLoading
+                                    ? const CircularProgressIndicator(color: Colors.black)
+                                    : Text(
+                                  'Sign Up',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 25),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Already have an account? ',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => Navigator.pushNamed(context, 'login'),
+                                child: Text(
+                                  'Login',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.deepOrange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      child: _isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 18)),
-                    ),
-                    SizedBox(height: 15),
-                    TextButton(
-                      onPressed: () => Navigator.pushNamed(context, 'login'),
-                      child: Text("Already have an account? Login", style: TextStyle(color: Colors.white70)),
                     ),
                   ],
                 ),
@@ -189,22 +210,38 @@ class _SignupState extends State<signup> {
     return TextFormField(
       controller: controller,
       obscureText: isPassword && !_passwordVisible,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.white70),
-        prefixIcon: Icon(icon, color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.teal.shade700),
         suffixIcon: isPassword
             ? IconButton(
-          icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.white70),
-          onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+          icon: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.teal.shade700,
+          ),
+          onPressed: () {
+            setState(() => _passwordVisible = !_passwordVisible);
+          },
         )
             : null,
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black45),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0), // Black outline border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black, width: 1.0), // Black outline border when enabled
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black, width: 2.0), // Black outline border when focused
+        ),
         filled: true,
-        fillColor: Colors.white.withOpacity(0.2),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+        fillColor: Colors.white24.withOpacity(0.8),
       ),
-      validator: (value) => value!.isEmpty ? "Please enter your $hint" : null,
+      validator: (value) => value!.isEmpty ? 'Please enter your $hint' : null,
     );
   }
 }

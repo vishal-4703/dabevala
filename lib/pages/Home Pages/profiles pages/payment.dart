@@ -23,7 +23,7 @@ class _PaymentPageState extends State<payment> {
   static const platform = MethodChannel('com.example.payment/phonepe');
   PaymentConfiguration? _gpayConfig;
 
-  DatabaseReference _cartRef = FirebaseDatabase.instance.ref().child('user_cart');
+  DatabaseReference _cartRef = FirebaseDatabase.instance.ref().child('cartItems');
   List<Map<String, dynamic>> _cartItems = [];
   double _totalPrice = 0.0;
 

@@ -29,7 +29,7 @@ class sub extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, Colors.black87, Colors.white],
+            colors: [Colors.white, Colors.white, Colors.teal.shade900],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

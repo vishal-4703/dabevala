@@ -171,7 +171,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', null, () {
                         Navigator.pushNamed(context, 'AboutUsPage');
                       }),
-                      buildMenuItem(context, Icons.logout_rounded, 'About Us', null, () {
+                      buildMenuItem(context, Icons.logout_rounded, 'Log Out', null, () {
                         Navigator.pushNamed(context, 'logout');
                       }),
                     ],
