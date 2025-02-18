@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class login extends StatefulWidget {
   @override
@@ -45,14 +46,14 @@ class _LoginState extends State<login> {
                           textStyle: GoogleFonts.poppins(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       ],
                       isRepeatingAnimation: true,
                       repeatForever: true,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
                     Container(
                       width: 120,
                       height: 120,
@@ -71,64 +72,73 @@ class _LoginState extends State<login> {
                         child: Image.asset('assets/logo.png', fit: BoxFit.cover),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 40),
                     Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          TextFormField(
-                            controller: emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.email, color: Colors.teal.shade700),
-                              hintText: 'Email Address',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
+                          // Email Text Field
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            child: TextFormField(
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.email, color: Colors.teal.shade700),
+                                hintText: 'Email Address',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.8),
                               ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.8),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email address';
+                                } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your email address';
-                              } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                                return 'Please enter a valid email address';
-                              }
-                              return null;
-                            },
                           ),
                           const SizedBox(height: 20),
-                          TextFormField(
-                            controller: passwordController,
-                            obscureText: _obscureText,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.lock_outline, color: Colors.teal.shade700),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureText
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.teal.shade700,
+
+                          // Password Text Field
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            child: TextFormField(
+                              controller: passwordController,
+                              obscureText: _obscureText,
+                              decoration: InputDecoration(
+                                prefixIcon: Icon(Icons.lock_outline, color: Colors.teal.shade700),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: Colors.teal.shade700,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureText = !_obscureText;
-                                  });
-                                },
+                                hintText: 'Password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.8),
                               ),
-                              hintText: 'Password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withOpacity(0.8),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your password';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              return null;
-                            },
                           ),
                           if (_errorMessage != null)
                             Padding(
@@ -139,14 +149,19 @@ class _LoginState extends State<login> {
                               ),
                             ),
                           const SizedBox(height: 30),
+
+                          // Login Button with Hover Effect
                           GestureDetector(
                             onTap: () async {
                               if (_formKey.currentState!.validate()) {
                                 String email = emailController.text.trim();
                                 String password = passwordController.text.trim();
 
-                                // Check if the email and password match the admin credentials
                                 if (email == 'admin@gmail.com' && password == 'admin12345') {
+                                  // Set SharedPreferences after admin login
+                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  prefs.setBool('isLoggedIn', true);
+
                                   Navigator.pushNamed(context, 'DashboardScreen');
                                 } else {
                                   // Regular user login with Firebase
@@ -155,6 +170,11 @@ class _LoginState extends State<login> {
                                       email: email,
                                       password: password,
                                     );
+
+                                    // Set SharedPreferences after successful login
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    prefs.setBool('isLoggedIn', true);
+
                                     Navigator.pushNamed(context, 'FoodDeliveryScreen');
                                   } on FirebaseAuthException catch (e) {
                                     setState(() {
@@ -164,8 +184,9 @@ class _LoginState extends State<login> {
                                 }
                               }
                             },
-                            child: Container(
-                              width:200,
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 300),
+                              width: 200,
                               height: 55,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),

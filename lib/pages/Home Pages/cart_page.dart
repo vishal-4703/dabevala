@@ -153,7 +153,7 @@ class _CartPageState extends State<CartPage> {
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.black12, Colors.white],
+                    colors: [Colors.teal.shade700, Colors.white],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -184,7 +184,7 @@ class _CartPageState extends State<CartPage> {
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Colors.teal.shade700,
                         ),
                       ),
                     ),
@@ -204,7 +204,7 @@ class _CartPageState extends State<CartPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.grey,
+                  backgroundColor: Colors.teal.shade700,
                   elevation: 8,
                   shadowColor: Colors.black.withOpacity(0.3),
                 ),
@@ -276,7 +276,7 @@ class CartItemWidget extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Colors.teal.shade700,
                     ),
                   ),
                 ],

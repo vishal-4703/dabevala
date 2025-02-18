@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class logout extends StatelessWidget {
+  // Function to handle the logout process
+  Future<void> _logout(BuildContext context) async {
+    // Clear SharedPreferences data
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+
+    // Log out the user from Firebase
+    await FirebaseAuth.instance.signOut();
+
+    // Navigate to the login screen
+    Navigator.pushReplacementNamed(context, 'login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +101,7 @@ class logout extends StatelessWidget {
                     // Continue button with ripple effect
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, 'login');
+                        _logout(context); // Call the logout function
                       },
                       child: Container(
                         width: double.infinity,

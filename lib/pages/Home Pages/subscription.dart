@@ -11,61 +11,56 @@ class sub extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white30,
+        backgroundColor: Colors.white,
+        elevation: 0,
         automaticallyImplyLeading: false,
         title: FadeInDown(
           child: Text(
             'Membership Plans',
             style: GoogleFonts.poppins(
-              fontSize: 26,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
         ),
-        elevation: 0,
         centerTitle: true,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Colors.white, Colors.teal.shade900],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: Colors.white,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 60),
+            padding: const EdgeInsets.symmetric(vertical: 80),
             child: FadeInUp(
               child: CarouselSlider(
                 options: CarouselOptions(
-                  height: 550,
+                  height: 600,
                   enlargeCenterPage: true,
                   enableInfiniteScroll: true,
                   autoPlay: true,
                   autoPlayInterval: Duration(seconds: 4),
                   autoPlayAnimationDuration: Duration(milliseconds: 800),
+                  viewportFraction: 0.75,
                 ),
                 items: [
                   _buildPricingCard(
                     title: 'MONTHLY',
                     price: '₹3000',
                     color: Colors.teal.shade400,
-                    features: ['Veg', 'Non Veg', 'Fast Delivery', 'Discounts'],
+                    features: ['Veg', 'Non-Veg', 'Fast Delivery', 'Special Discounts'],
                     context: context,
                   ),
                   _buildPricingCard(
                     title: '3 MONTHS',
                     price: '₹8000',
                     color: Colors.blueAccent.shade200,
-                    features: ['Veg', 'Non Veg', 'Premium Support', 'Extra Discounts'],
+                    features: ['Veg', 'Non-Veg', 'Premium Support', 'Extra Discounts'],
                     context: context,
                   ),
                   _buildPricingCard(
                     title: '6 MONTHS',
                     price: '₹15,000',
-                    color: Colors.deepPurpleAccent.shade100,
+                    color: Colors.purpleAccent.shade100,
                     features: ['Priority Delivery', 'Exclusive Offers', 'VIP Support'],
                     context: context,
                   ),
@@ -87,19 +82,19 @@ class sub extends StatelessWidget {
   }) {
     return ZoomIn(
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 10),
+        margin: EdgeInsets.symmetric(horizontal: 12),
         padding: EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(35),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 15,
-              offset: Offset(0, 8),
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 20,
+              offset: Offset(0, 10),
             ),
           ],
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
+          border: Border.all(color: Colors.grey.withOpacity(0.3)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -108,24 +103,24 @@ class sub extends StatelessWidget {
               child: Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 28,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: color,
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 20),
             FadeInUp(
               child: Text(
                 price,
                 style: GoogleFonts.poppins(
-                  fontSize: 40,
+                  fontSize: 42,
                   fontWeight: FontWeight.w800,
-                  color: Colors.yellowAccent,
+                  color: Colors.black,
                 ),
               ),
             ),
-            SizedBox(height: 25),
+            SizedBox(height: 30),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: features.map((feature) {
@@ -134,12 +129,12 @@ class sub extends StatelessWidget {
                   child: SlideInLeft(
                     child: Row(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.greenAccent),
+                        Icon(Icons.check_circle, color: color),
                         SizedBox(width: 10),
                         Text(
                           feature,
                           style: GoogleFonts.lato(
-                            color: Colors.white,
+                            color: Colors.black87,
                             fontSize: 18,
                           ),
                         ),
@@ -149,21 +144,22 @@ class sub extends StatelessWidget {
                 );
               }).toList(),
             ),
-            SizedBox(height: 35),
+            SizedBox(height: 40),
             BounceInUp(
               child: ElevatedButton(
                 onPressed: () => _saveSubscription(title, price, features, context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: color,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                  padding: EdgeInsets.symmetric(vertical: 18, horizontal: 36),
+                  elevation: 5,
                 ),
                 child: Text(
                   'SUBSCRIBE',
                   style: TextStyle(
-                    color: color,
+                    color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),

@@ -26,173 +26,171 @@ class _AboutUsPageState extends State<AboutUsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Animated Gradient Background with Animation Effect
-          AnimatedContainer(
-            duration: Duration(seconds: 3),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple.shade900, Colors.indigo.shade700],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 50,
-            left: 20,
-            child: FadeInLeft(
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-          Center(
-            child: AnimatedOpacity(
-              duration: Duration(seconds: 1),
-              opacity: _opacity,
-              child: BounceInDown(
-                duration: Duration(milliseconds: 800),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(255, 255, 255, 0.2), // Updated
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 15,
-                          spreadRadius: 3,
-                        ),
-                      ],
-                      border: Border.all(color: Color.fromRGBO(255, 255, 255, 0.3)), // Updated
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  height: 300,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.pinkAccent.shade200, Colors.deepPurple.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 80),
+                      FadeInDown(
+                        child: Text(
+                          'About Us',
+                          style: GoogleFonts.poppins(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      FadeInUp(
+                        child: Text(
+                          'Discover Our Passion for Food Delivery',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
+            FadeIn(
+              duration: Duration(milliseconds: 800),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Text(
+                      'We are committed to redefining your food delivery experience with unmatched reliability and efficiency. Our platform connects you with your favorite meals from top-notch Dabbawala in record time.\n\n\nहम बेजोड़ विश्वसनीयता और दक्षता के साथ आपके भोजन वितरण अनुभव को फिर से परिभाषित करने के लिए प्रतिबद्ध हैं। हमारा प्लेटफ़ॉर्म आपको रिकॉर्ड समय में शीर्ष डब्बावाला से आपके पसंदीदा भोजन से जोड़ता है',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: Colors.grey[800],
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    Divider(color: Colors.grey.shade400),
+                    SizedBox(height: 25),
+                    FadeInLeft(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(FontAwesomeIcons.locationDot, color: Colors.deepPurple.shade400),
+                          SizedBox(width: 10),
+                          Text(
+                            'Mumbai, India',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    FadeInRight(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(FontAwesomeIcons.phoneFlip, color: Colors.deepPurple.shade400),
+                          SizedBox(width: 10),
+                          Text(
+                            '+91 7738395822',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    JelloIn(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          elevation: 10,
+                        ),
+                        onPressed: () async {
+                          const phoneNumber = 'tel:+917738395822';
+                          final Uri phoneUri = Uri.parse(phoneNumber);
+                          if (await canLaunchUrl(phoneUri)) {
+                            await launchUrl(phoneUri);
+                          } else {
+                            throw 'Could not launch $phoneNumber';
+                          }
+                        },
                         child: Padding(
-                          padding: const EdgeInsets.all(25.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Swing(
-                                duration: Duration(milliseconds: 1000),
-                                child: Text(
-                                  'About Us',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 15),
-                              FadeIn(
-                                duration: Duration(milliseconds: 1200),
-                                child: Text(
-                                  'We are dedicated to delivering the best food delivery experience. Our mission is to connect customers with their favorite restaurants and ensure fast and reliable delivery services.',
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 18,
-                                    color: Color.fromRGBO(255, 255, 255, 0.9), // Updated
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              Divider(color: Color.fromRGBO(255, 255, 255, 0.5)), // Updated
-                              SizedBox(height: 15),
-                              FadeInLeft(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(FontAwesomeIcons.locationDot, color: Colors.white), // Updated
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Mumbai, India',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              FadeInRight(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(FontAwesomeIcons.phoneFlip, color: Colors.white), // Updated
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '+91 7738395822',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              JelloIn(
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromRGBO(255, 255, 255, 0.3), // Updated
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    const phoneNumber = 'tel:+917738395822';
-                                    final Uri phoneUri = Uri.parse(phoneNumber); // Updated
-                                    if (await canLaunchUrl(phoneUri)) { // Updated
-                                      await launchUrl(phoneUri); // Updated
-                                    } else {
-                                      throw 'Could not launch $phoneNumber';
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 25),
-                                    child: Text(
-                                      'Contact Us',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 15),
-                              SlideInLeft(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(FontAwesomeIcons.facebook, color: Colors.white, size: 30),
-                                    SizedBox(width: 15),
-                                    Icon(FontAwesomeIcons.twitter, color: Colors.white, size: 30),
-                                    SizedBox(width: 15),
-                                    Icon(FontAwesomeIcons.instagram, color: Colors.white, size: 30),
-                                  ],
-                                ),
-                              ),
-                            ],
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+                          child: Text(
+                            'Contact Us',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.2,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                    SizedBox(height: 35),
+                    FadeInUp(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(FontAwesomeIcons.facebook, color: Colors.deepPurple.shade400, size: 35),
+                          SizedBox(width: 25),
+                          Icon(FontAwesomeIcons.twitter, color: Colors.deepPurple.shade400, size: 35),
+                          SizedBox(width: 25),
+                          Icon(FontAwesomeIcons.instagram, color: Colors.deepPurple.shade400, size: 35),
+                          SizedBox(width: 25),
+                          Icon(FontAwesomeIcons.linkedin, color: Colors.deepPurple.shade400, size: 35),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

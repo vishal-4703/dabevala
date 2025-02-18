@@ -2,10 +2,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'profiles pages/NextPage.dart';
+import 'dart:async';
+
 import 'cart_page.dart';
-import 'subscription.dart';
 import 'profile.dart';
+import 'subscription.dart'; // For Timer
 
 class FoodGoHomePage extends StatefulWidget {
   @override
@@ -15,6 +16,9 @@ class FoodGoHomePage extends StatefulWidget {
 class _FoodGoHomePageState extends State<FoodGoHomePage> {
   int _selectedIndex = 0;
   final DatabaseReference _database = FirebaseDatabase.instance.ref().child('MenuItems');
+  PageController _pageController = PageController();
+  int _currentPage = 0;
+  Timer? _timer;
 
   List<Map<String, dynamic>> _todaysOffer = [];
   List<Map<String, dynamic>> _offers = [];
@@ -24,6 +28,29 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
   void initState() {
     super.initState();
     _fetchMenuItems();
+    _startAutoScroll();
+  }
+
+  void _startAutoScroll() {
+    _timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_currentPage < _todaysOffer.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
+      }
+      _pageController.animateToPage(
+        _currentPage,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _fetchMenuItems() {
@@ -63,7 +90,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
   }
 
   List<Widget> get _pages => [
-    HomeContent(todaysOffer: _todaysOffer, offers: _offers, popular: _popular),
+    HomeContent(todaysOffer: _todaysOffer, offers: _offers, popular: _popular, pageController: _pageController, currentPage: _currentPage),
     sub(),
     CartPage(),
     ProfilePage(),
@@ -86,7 +113,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
             Text('DABBAWALA', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.lightBlue,
+        backgroundColor: Colors.teal.shade700,
         elevation: 4,
         actions: [
           GestureDetector(
@@ -105,7 +132,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, 'MenuPage'),
         child: Icon(Icons.fastfood, color: Colors.white),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.teal.shade700,
         elevation: 6,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -116,8 +143,8 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
   Widget _buildBottomNavigationBar() {
     return CurvedNavigationBar(
       backgroundColor: Colors.transparent,
-      buttonBackgroundColor: Colors.lightBlue,
-      color: Colors.lightBlue,
+      buttonBackgroundColor: Colors.teal.shade700,
+      color: Colors.teal.shade700,
       height: 60,
       animationDuration: Duration(milliseconds: 400),
       items: <Widget>[
@@ -136,8 +163,10 @@ class HomeContent extends StatelessWidget {
   final List<Map<String, dynamic>> todaysOffer;
   final List<Map<String, dynamic>> offers;
   final List<Map<String, dynamic>> popular;
+  final PageController pageController;
+  final int currentPage;
 
-  HomeContent({required this.todaysOffer, required this.offers, required this.popular});
+  HomeContent({required this.todaysOffer, required this.offers, required this.popular, required this.pageController, required this.currentPage});
 
   @override
   Widget build(BuildContext context) {
@@ -167,9 +196,9 @@ class HomeContent extends StatelessWidget {
             ).animate().fade(duration: 600.ms),
 
             SizedBox(height: 20),
-            _buildCategoryList(context, '🌟 Today\'s Offer', todaysOffer),
+            _buildCategoryList(context, '🌟 Today\'s Offer', todaysOffer, isHorizontal: true),
             SizedBox(height: 20),
-            _buildCategoryList(context, '🎉 Special Offers', offers),
+            _buildCategoryList(context, '🎉 Special Offers', offers, isHorizontal: true),
             SizedBox(height: 20),
             _buildCategoryList(context, '🍽️ Popular Dishes', popular),
           ],
@@ -178,47 +207,229 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryList(BuildContext context, String title, List<Map<String, dynamic>> items) {
+  Widget _buildCategoryList(BuildContext context, String title, List<Map<String, dynamic>> items, {bool isHorizontal = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))
             .animate().fade(duration: 500.ms),
         SizedBox(height: 10),
-        Container(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+        if (isHorizontal && title == '🎉 Special Offers')
+          Container(
+            height: 150, // Fixed height for horizontal scroll
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                return _buildHorizontalSmallFoodCard(items[index], context);
+              },
+            ),
+          ),
+        if (isHorizontal && title != '🎉 Special Offers')
+          Column(
+            children: [
+              Container(
+                height: 300, // Increased height for Today's Offer
+                child: PageView.builder(
+                  controller: pageController,
+                  itemCount: items.length,
+                  onPageChanged: (index) {
+                    // Update current page index
+                  },
+                  itemBuilder: (context, index) {
+                    return _buildHorizontalFoodCard(items[index], context);
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(items.length, (index) {
+                  return Container(
+                    width: 8,
+                    height: 8,
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: currentPage == index ? Colors.deepOrange : Colors.grey,
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        if (!isHorizontal)
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.8,
+            ),
             itemCount: items.length,
             itemBuilder: (context, index) {
               return _buildFoodCard(items[index], context);
             },
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildFoodCard(Map<String, dynamic> item, BuildContext context) {
+  Widget _buildHorizontalSmallFoodCard(Map<String, dynamic> item, BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 4,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(item['assetImagePath'], width: 150, height: 120, fit: BoxFit.cover),
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+    child: Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 4,
+    child: Container(
+    width: 120, // Adjust width for smaller cards
+    decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    ClipRRect(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+    child: Image.asset(
+    item['assetImagePath'],
+    width: double.infinity,
+    height: 80, // Adjust height for smaller cards
+    fit: BoxFit.cover,
+    ),
+    ),
+    Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text(
+    item['itemName'],
+    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    ),
+    SizedBox(height: 5),
+    Text(
+    '\$${item['price']}',
+    style: TextStyle(color: Colors.grey, fontSize: 12),
+    ),
+    ],
+    ),
+    ),
+    ],
+    ),
+    ),
+    ).animate().fade(duration: 400.ms).scale());
+  }
+
+  Widget _buildHorizontalFoodCard(Map<String, dynamic> item, BuildContext context) {
+    return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+    child: Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    elevation: 8,
+    child: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    colors: [Colors.orangeAccent, Colors.deepOrange],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    ),
+    borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    ClipRRect(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    child: Image.asset(
+    item['assetImagePath'],
+    width: double.infinity,
+    height: 150,
+    fit: BoxFit.cover,
+    ),
+    ),
+    Padding(
+    padding: const EdgeInsets.all(12.0),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text(
+    item['itemName'],
+    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    ),
+    SizedBox(height: 5),
+    Text(
+    '\$${item['price']}',
+    style: TextStyle(color: Colors.white70, fontSize: 16),
+    ),
+    SizedBox(height: 10),
+    ElevatedButton(
+    onPressed: () {
+    // Add to cart or navigate to details
+    },
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+    ),
+    ),
+    child: Text(
+    'Order Now',
+    style: TextStyle(color: Colors.deepOrange),
+    ),
+    ),
+    ],
+    ),
+    ),
+    ],
+    ),
+    ),
+    ).animate().fade(duration: 400.ms).scale());
+  }
+
+  Widget _buildFoodCard(Map<String, dynamic> item, BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            child: Image.asset(
+              item['assetImagePath'],
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(item['itemName'], style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['itemName'],
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 5),
+                Text(
+                  '\$${item['price']}',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
             ),
-          ],
-        ),
-      ).animate().fade(duration: 400.ms).scale(),
-    );
+          ),
+        ],
+      ),
+    ).animate().fade(duration: 400.ms).scale();
   }
 }

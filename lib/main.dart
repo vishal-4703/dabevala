@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'pages/Home Pages/profiles pages/About Us.dart';
 import 'pages/Home Pages/profiles pages/Notifications.dart';
 import 'pages/Home Pages/profiles pages/SubscriptionDetailsPage.dart';
+import 'pages/Splash_Screen.dart';
 import 'screens/AddMenuItemPage.dart';
 import 'screens/addmenu.dart';
 import 'screens/dashboard_screen.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp( title: 'DabbaWala',
       theme: ThemeData(
       primarySwatch: Colors.blue, ),
-      home: login(),
+      home: const SplashScreen(),
       routes: {
 
         'AddMenuItemPage': (context) => AddMenuItemPage(),
