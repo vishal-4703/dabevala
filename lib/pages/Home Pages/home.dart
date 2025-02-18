@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
-
 import 'cart_page.dart';
 import 'profile.dart';
-import 'subscription.dart'; // For Timer
+import 'subscription.dart';
 
 class FoodGoHomePage extends StatefulWidget {
   @override
@@ -23,6 +22,9 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
   List<Map<String, dynamic>> _todaysOffer = [];
   List<Map<String, dynamic>> _offers = [];
   List<Map<String, dynamic>> _popular = [];
+  List<Map<String, dynamic>> _filteredTodaysOffer = [];
+  List<Map<String, dynamic>> _filteredOffers = [];
+  List<Map<String, dynamic>> _filteredPopular = [];
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
 
   void _startAutoScroll() {
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
-      if (_currentPage < _todaysOffer.length - 1) {
+      if (_currentPage < _filteredTodaysOffer.length - 1) {
         _currentPage++;
       } else {
         _currentPage = 0;
@@ -85,13 +87,42 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
         _todaysOffer = todaysOffer;
         _offers = offers;
         _popular = popular;
+        _filteredTodaysOffer = todaysOffer;
+        _filteredOffers = offers;
+        _filteredPopular = popular;
       });
     });
   }
 
+  void _performSearch(String query) {
+    setState(() {
+      _filteredTodaysOffer = _todaysOffer
+          .where((item) => item['itemName'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      _filteredOffers = _offers
+          .where((item) => item['itemName'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      _filteredPopular = _popular
+          .where((item) => item['itemName'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
   List<Widget> get _pages => [
-    HomeContent(todaysOffer: _todaysOffer, offers: _offers, popular: _popular, pageController: _pageController, currentPage: _currentPage),
-    sub(),
+    HomeContent(
+      todaysOffer: _filteredTodaysOffer,
+      offers: _filteredOffers,
+      popular: _filteredPopular,
+      pageController: _pageController,
+      currentPage: _currentPage,
+      onSearch: _performSearch,
+      onPageChanged: (index) {
+        setState(() {
+          _currentPage = index;
+        });
+      },
+    ),
+    sub(), // Assuming you have a SubscriptionPage
     CartPage(),
     ProfilePage(),
   ];
@@ -165,8 +196,18 @@ class HomeContent extends StatelessWidget {
   final List<Map<String, dynamic>> popular;
   final PageController pageController;
   final int currentPage;
+  final Function(String) onSearch;
+  final Function(int) onPageChanged;
 
-  HomeContent({required this.todaysOffer, required this.offers, required this.popular, required this.pageController, required this.currentPage});
+  HomeContent({
+    required this.todaysOffer,
+    required this.offers,
+    required this.popular,
+    required this.pageController,
+    required this.currentPage,
+    required this.onSearch,
+    required this.onPageChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +234,7 @@ class HomeContent extends StatelessWidget {
                 fillColor: Colors.white,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
               ),
+              onSubmitted: onSearch,
             ).animate().fade(duration: 600.ms),
 
             SizedBox(height: 20),
@@ -229,32 +271,36 @@ class HomeContent extends StatelessWidget {
           Column(
             children: [
               Container(
-                height: 300, // Increased height for Today's Offer
+                height: 290, // Increased height for Today's Offer
                 child: PageView.builder(
                   controller: pageController,
                   itemCount: items.length,
-                  onPageChanged: (index) {
-                    // Update current page index
-                  },
+                  onPageChanged: onPageChanged, // Update current page index
                   itemBuilder: (context, index) {
                     return _buildHorizontalFoodCard(items[index], context);
                   },
                 ),
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(items.length, (index) {
-                  return Container(
-                    width: 8,
-                    height: 8,
-                    margin: EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentPage == index ? Colors.deepOrange : Colors.grey,
-                    ),
-                  );
-                }),
+              // Fixed Page Indicators
+              Container(
+                width: double.infinity,
+                child: Center(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: List.generate(items.length, (index) {
+                      return Container(
+                        width: 8,
+                        height: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: currentPage == index ? Colors.teal.shade700 : Colors.grey,
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ),
             ],
           ),
@@ -280,117 +326,117 @@ class HomeContent extends StatelessWidget {
   Widget _buildHorizontalSmallFoodCard(Map<String, dynamic> item, BuildContext context) {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0),
-    child: Card(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    elevation: 4,
-    child: Container(
-    width: 120, // Adjust width for smaller cards
-    decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    ClipRRect(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-    child: Image.asset(
-    item['assetImagePath'],
-    width: double.infinity,
-    height: 80, // Adjust height for smaller cards
-    fit: BoxFit.cover,
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    item['itemName'],
-    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    ),
-    SizedBox(height: 5),
-    Text(
-    '\$${item['price']}',
-    style: TextStyle(color: Colors.grey, fontSize: 12),
-    ),
-    ],
-    ),
-    ),
-    ],
-    ),
-    ),
-    ).animate().fade(duration: 400.ms).scale());
+        child: Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 4,
+          child: Container(
+            width: 170, // Adjust width for smaller cards
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.asset(
+                    item['assetImagePath'],
+                    width: double.infinity,
+                    height: 80, // Adjust height for smaller cards
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['itemName'],
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        '\$${item['price']}',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ).animate().fade(duration: 400.ms).scale());
   }
 
   Widget _buildHorizontalFoodCard(Map<String, dynamic> item, BuildContext context) {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0),
-    child: Card(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    elevation: 8,
-    child: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    colors: [Colors.orangeAccent, Colors.deepOrange],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    ),
-    borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    ClipRRect(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    child: Image.asset(
-    item['assetImagePath'],
-    width: double.infinity,
-    height: 150,
-    fit: BoxFit.cover,
-    ),
-    ),
-    Padding(
-    padding: const EdgeInsets.all(12.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    item['itemName'],
-    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    ),
-    SizedBox(height: 5),
-    Text(
-    '\$${item['price']}',
-    style: TextStyle(color: Colors.white70, fontSize: 16),
-    ),
-    SizedBox(height: 10),
-    ElevatedButton(
-    onPressed: () {
-    // Add to cart or navigate to details
-    },
-    style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(10),
-    ),
-    ),
-    child: Text(
-    'Order Now',
-    style: TextStyle(color: Colors.deepOrange),
-    ),
-    ),
-    ],
-    ),
-    ),
-    ],
-    ),
-    ),
-    ).animate().fade(duration: 400.ms).scale());
+        child: Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 8,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.teal.shade700, Colors.greenAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Image.asset(
+                    item['assetImagePath'],
+                    width: double.infinity,
+                    height: 150,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['itemName'],
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 5),
+                      Text(
+                        '\$${item['price']}',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Add to cart or navigate to details
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          'Order Now',
+                          style: TextStyle(color: Colors.deepOrange),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ).animate().fade(duration: 400.ms).scale());
   }
 
   Widget _buildFoodCard(Map<String, dynamic> item, BuildContext context) {

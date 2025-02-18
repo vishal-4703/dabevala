@@ -55,7 +55,7 @@ class forgetpassword extends StatelessWidget {
                     child: Icon(
                       Icons.lock_outline,
                       size: 120,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -129,8 +129,8 @@ class forgetpassword extends StatelessWidget {
           obscureText: true,
           decoration: InputDecoration(
             labelText: label,
-            labelStyle: TextStyle(color: Colors.white70, fontSize: 16),
-            prefixIcon: Icon(icon, color: Colors.white70),
+            labelStyle: TextStyle(color: Colors.black, fontSize: 16),
+            prefixIcon: Icon(icon, color: Colors.black),
             filled: true,
             fillColor: Colors.transparent,
             border: OutlineInputBorder(
@@ -174,7 +174,7 @@ class forgetpassword extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
               letterSpacing: 1.5,
             ),
           ),
