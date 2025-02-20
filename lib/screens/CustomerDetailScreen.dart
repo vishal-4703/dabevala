@@ -31,7 +31,7 @@ class CustomerDetailScreen extends StatelessWidget {
           customer.username.isNotEmpty ? customer.username : "Unknown User",
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 24, color: Colors.white),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.teal.shade700,
         elevation: 10,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
@@ -47,7 +47,7 @@ class CustomerDetailScreen extends StatelessWidget {
               opacity: 0.2,
               child: Card(
                 elevation: 20,
-                shadowColor: Colors.blue.shade400,
+                shadowColor: Colors.teal.shade700,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 child: Padding(
                   padding: const EdgeInsets.all(30),
@@ -71,7 +71,7 @@ class CustomerDetailScreen extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade900,
+                            color: Colors.teal.shade700,
                           ),
                         ),
                       ),
@@ -91,7 +91,7 @@ class CustomerDetailScreen extends StatelessWidget {
                           } else if (snapshot.hasError || snapshot.data == false) {
                             return Text(
                               "Order Details",
-                              style: GoogleFonts.poppins(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.bold),
+                              style: GoogleFonts.poppins(fontSize: 18, color: Colors.teal.shade700, fontWeight: FontWeight.bold),
                             );
                           } else {
                             return Lottie.asset(
@@ -116,10 +116,10 @@ class CustomerDetailScreen extends StatelessWidget {
                           icon: Icon(Icons.arrow_forward_ios,),
                           label: Text("Order",style: GoogleFonts.poppins(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
+                            backgroundColor: Colors.teal.shade700,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),),
                             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 35),
-                            shadowColor: Colors.blue.shade700,
+                            shadowColor: Colors.teal.shade700,
                             iconColor: Colors.white,
                             elevation: 10,
                           ),

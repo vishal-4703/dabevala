@@ -89,7 +89,12 @@ class _MenuState extends State<Menu> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Our Menu'),
+        title: Text(
+          'Our Menu',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 24),
+        ),
+        backgroundColor: Colors.teal.shade700,
+        automaticallyImplyLeading: false, // This line removes the back arrow
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.orange,

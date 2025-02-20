@@ -21,6 +21,7 @@ class _LoginState extends State<login> {
     return Scaffold(
       body: Stack(
         children: [
+
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -46,7 +47,7 @@ class _LoginState extends State<login> {
                           textStyle: GoogleFonts.poppins(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ],

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:animate_do/animate_do.dart';  // For animations
+import 'package:animate_do/animate_do.dart';
+
+import 'PaymentDetailsScreen.dart';  // For animations
 
 class CartItemsScreen extends StatefulWidget {
   final String userId;  // Add this parameter
@@ -122,6 +123,27 @@ class _CartPageState extends State<CartItemsScreen> {
               ),
             ),
             SizedBox(height: 20),
+            // Add the Pay Details button
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PaymentDetailsScreen()),
+                  );
+                },
+                child: Text('Pay Details', style: GoogleFonts.poppins(fontSize: 18)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -191,3 +213,4 @@ class CartItemWidget extends StatelessWidget {
     );
   }
 }
+

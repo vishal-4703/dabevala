@@ -27,7 +27,7 @@ class NextPage extends StatelessWidget {
           itemName,
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
-            fontSize: 22,
+            fontSize: 30,
             color: Colors.white,
           ),
         ),
@@ -41,7 +41,7 @@ class NextPage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.deepPurple.shade900, Colors.blue],
+                colors: [Colors.teal.shade300, Colors.teal.shade900],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -122,7 +122,7 @@ class NextPage extends StatelessWidget {
                       child: Text(
                         'Add to Cart',
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),

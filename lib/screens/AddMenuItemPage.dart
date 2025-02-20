@@ -54,7 +54,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Menu Item'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.teal.shade700,
         elevation: 3,
       ),
       body: SingleChildScrollView(
@@ -62,11 +62,11 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.restaurant_menu, size: 50, color: Colors.blue),
+            Icon(Icons.restaurant_menu, size: 50, color: Colors.teal.shade700),
             SizedBox(height: 20),
             Text(
               'Add a New Menu Item',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.teal.shade700),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
@@ -128,14 +128,14 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
             ElevatedButton(
               onPressed: _addMenuItem,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.teal.shade700,
                 padding: EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 textStyle: TextStyle(fontSize: 18),
               ),
-              child: Text('➕ Add Item'),
+              child: Text('➕ Add Item',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, fontSize: 20)),
             ),
           ],
         ),

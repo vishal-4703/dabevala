@@ -8,7 +8,7 @@ class TColor {
   static const Color primaryText = Color(0xFFFFFFFF);
   static const Color secondaryText = Color(0xFFFFFFFF);
   static const Color textfield = Color(0xFFFFFFFF);
-  static const Color primary = Color(0xFF0039FF);
+  static const Color primary = Color(0xFF0F954D);
 }
 
 class payment extends StatefulWidget {
@@ -135,7 +135,7 @@ class _PaymentPageState extends State<payment> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Page'),
+        title: const Text('Payment Page',style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: TColor.primary,
       ),
       body: Center(
@@ -163,7 +163,7 @@ class _PaymentPageState extends State<payment> {
                   child: Text(
                     'Pay with Razorpay',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),

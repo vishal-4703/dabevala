@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import 'cart_page.dart';
 import 'profile.dart';
+import 'profiles pages/NextPage.dart';
 import 'subscription.dart';
 
 class FoodGoHomePage extends StatefulWidget {
@@ -148,7 +149,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
         elevation: 4,
         actions: [
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/profile'),
+            onTap: () => Navigator.pushNamed(context, 'profile'),
             child: Padding(
               padding: EdgeInsets.only(right: 16),
               child: CircleAvatar(
@@ -324,7 +325,21 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildHorizontalSmallFoodCard(Map<String, dynamic> item, BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NextPage(
+              itemName: item['itemName'],
+              day: item['day'],
+              price: item['price'],
+              assetImagePath: item['assetImagePath'],
+            ),
+          ),
+        );
+      },
+      child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0),
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -368,11 +383,27 @@ class HomeContent extends StatelessWidget {
               ],
             ),
           ),
-        ).animate().fade(duration: 400.ms).scale());
+        ).animate().fade(duration: 400.ms).scale(),
+      ),
+    );
   }
 
   Widget _buildHorizontalFoodCard(Map<String, dynamic> item, BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NextPage(
+              itemName: item['itemName'],
+              day: item['day'],
+              price: item['price'],
+              assetImagePath: item['assetImagePath'],
+            ),
+          ),
+        );
+      },
+      child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.0),
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -436,46 +467,63 @@ class HomeContent extends StatelessWidget {
               ],
             ),
           ),
-        ).animate().fade(duration: 400.ms).scale());
+        ).animate().fade(duration: 400.ms).scale(),
+      ),
+    );
   }
 
   Widget _buildFoodCard(Map<String, dynamic> item, BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
-              item['assetImagePath'],
-              width: double.infinity,
-              height: 120,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NextPage(
+              itemName: item['itemName'],
+              day: item['day'],
+              price: item['price'],
+              assetImagePath: item['assetImagePath'],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['itemName'],
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 5),
-                Text(
-                  '\$${item['price']}',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-              ],
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 4,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.asset(
+                item['assetImagePath'],
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-        ],
-      ),
-    ).animate().fade(duration: 400.ms).scale();
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['itemName'],
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    '\$${item['price']}',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ).animate().fade(duration: 400.ms).scale(),
+    );
   }
 }

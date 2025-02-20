@@ -39,7 +39,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false, // Removes the back button
         title: Text('Customer List', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.teal.shade700,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -92,7 +92,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             child: ListTile(
               contentPadding: EdgeInsets.all(16),
               leading: CircleAvatar(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: Colors.teal.shade700,
                 child: Icon(Icons.person, color: Colors.white),
               ),
               title: Text(customers[index].username, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

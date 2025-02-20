@@ -66,7 +66,7 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
               height: 120,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue, Colors.lightBlueAccent],
+                  colors: [Colors.teal.shade700, Colors.teal.shade700],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
