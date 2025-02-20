@@ -8,21 +8,32 @@ class AddMenuItemPage extends StatefulWidget {
 
 class _AddMenuItemPageState extends State<AddMenuItemPage> {
   final _itemNameController = TextEditingController();
-  final _dayController = TextEditingController();
   final _priceController = TextEditingController();
   final _imagePathController = TextEditingController(text: 'assets/');
 
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref().child("MenuItems");
 
   String _selectedCategory = "meals"; // Default category
+  String _selectedDay = "Monday"; // Default day
+
+  // List of days for the dropdown
+  final List<String> _daysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+    "All Day's",
+  ];
 
   void _addMenuItem() {
     final String itemName = _itemNameController.text.trim();
-    final String day = _dayController.text.trim();
     final String price = _priceController.text.trim();
     final String imagePath = _imagePathController.text.trim();
 
-    if (itemName.isEmpty || day.isEmpty || price.isEmpty || _selectedCategory.isEmpty) {
+    if (itemName.isEmpty || price.isEmpty || _selectedCategory.isEmpty || _selectedDay.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('⚠️ All fields are required!')),
       );
@@ -31,7 +42,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
 
     _dbRef.push().set({
       "itemName": itemName,
-      "day": day,
+      "day": _selectedDay,
       "price": price,
       "assetImagePath": imagePath,
       "category": _selectedCategory,
@@ -46,7 +57,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
       );
     });
 
-    print("✔ Added Item: $itemName | Day: $day | Price: ₹$price | Category: $_selectedCategory");
+    print("✔ Added Item: $itemName | Day: $_selectedDay | Price: ₹$price | Category: $_selectedCategory");
   }
 
   @override
@@ -79,13 +90,24 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
               ),
             ),
             SizedBox(height: 15),
-            TextField(
-              controller: _dayController,
+            DropdownButtonFormField<String>(
+              value: _selectedDay,
               decoration: InputDecoration(
-                labelText: 'Day',
+                labelText: "Select Day",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.calendar_today),
               ),
+              items: _daysOfWeek.map((String day) {
+                return DropdownMenuItem<String>(
+                  value: day,
+                  child: Text(day),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedDay = value!;
+                });
+              },
             ),
             SizedBox(height: 15),
             TextField(
@@ -135,7 +157,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 ),
                 textStyle: TextStyle(fontSize: 18),
               ),
-              child: Text('➕ Add Item',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, fontSize: 20)),
+              child: Text('➕ Add Item', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20)),
             ),
           ],
         ),
