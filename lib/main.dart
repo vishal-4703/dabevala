@@ -11,9 +11,6 @@ import 'package:your_project_name/pages/food_list_page.dart';
 import 'package:your_project_name/pages/model/food_item.dart';
 import 'pages/login pages/login.dart';
 import 'pages/login pages/signup.dart';
-import 'pages/Home Pages/food pages/todays offer/10off.dart';
-import 'pages/Home Pages/food pages/todays offer/15.off.dart';
-import 'pages/Home Pages/food pages/todays offer/20 off.dart';
 import 'pages/Home Pages/menu.dart';
 import 'pages/Home Pages/profiles pages/realtime.dart';
 import 'pages/login pages/forgetpassword.dart';
@@ -22,7 +19,6 @@ import 'pages/Home Pages/profiles pages/logout.dart';
 import 'pages/Home Pages/logo.dart';
 import 'pages/Home Pages/home.dart';
 import 'pages/Home Pages/profiles pages/payment.dart';
-import 'pages/Home Pages/food pages/Nonevegfood.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,9 +51,6 @@ class MyApp extends StatelessWidget {
         'MenuPage': (context) => MenuPage(),
         'logout': (context) => logout(),
         'payment': (context) => payment(),
-        'first': (context) => first(),
-        'second': (context) => second(),
-        'third': (context) => third(),
         'Realtime': (context) => Realtime(),
       },
       debugShowCheckedModeBanner: false,

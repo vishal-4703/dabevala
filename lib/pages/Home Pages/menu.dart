@@ -61,16 +61,17 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Our Menu', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Our Menu', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
             Tab(text: "Meals"),
             Tab(text: "7 Days Meals"),
           ],
-          indicatorColor: Colors.orangeAccent,
+          indicatorColor: Colors.deepOrange,
+          labelColor: Colors.white,
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.teal.shade700,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -185,10 +186,10 @@ class MenuItem extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlueAccent,
+                backgroundColor: Colors.teal.shade700,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: Text("View", style: TextStyle(fontSize: 16)),
+              child: Text("View", style: TextStyle(color: Colors.white,fontSize: 16)),
             ),
           ),
         ],
