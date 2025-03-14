@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:pay/pay.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 class TColor {
   static const Color primaryText = Color(0xFFFFFFFF);
@@ -12,20 +11,19 @@ class TColor {
 }
 
 class payment extends StatefulWidget {
-  const payment({Key? key}) : super(key: key);
+  final List<Map<String, dynamic>> cartItems;
+  final double totalPrice;
+
+  const payment({Key? key, required this.cartItems, required this.totalPrice}) : super(key: key);
 
   @override
-  State<payment> createState() => _PaymentPageState();
+  State<payment> createState() => _PaymentScreenState();
 }
 
-class _PaymentPageState extends State<payment> {
+class _PaymentScreenState extends State<payment> {
   late Razorpay _razorpay;
   static const platform = MethodChannel('com.example.payment/phonepe');
   PaymentConfiguration? _gpayConfig;
-
-  DatabaseReference _cartRef = FirebaseDatabase.instance.ref().child('cartItems');
-  List<Map<String, dynamic>> _cartItems = [];
-  double _totalPrice = 0.0;
 
   @override
   void initState() {
@@ -35,42 +33,12 @@ class _PaymentPageState extends State<payment> {
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     _loadGooglePayConfiguration();
-    _fetchCartItems();
   }
 
   Future<void> _loadGooglePayConfiguration() async {
     final gpayConfig = await PaymentConfiguration.fromAsset('gpay.json');
     setState(() {
       _gpayConfig = gpayConfig;
-    });
-  }
-
-  void _updateTotalPriceInFirebase(double totalPrice) {
-    _cartRef.child('totalPrice').set(totalPrice);
-  }
-
-  Future<void> _fetchCartItems() async {
-    _cartRef.onValue.listen((event) {
-      List<Map<String, dynamic>> cartItems = [];
-      double totalPrice = 0.0;
-
-      for (var item in event.snapshot.children) {
-        Map<String, dynamic> cartItem = {
-          'name': item.child('name').value,
-          'price': item.child('price').value,
-          'quantity': item.child('quantity').value,
-        };
-        cartItems.add(cartItem);
-        totalPrice += (cartItem['price'] as double) * (cartItem['quantity'] as int);
-      }
-
-      setState(() {
-        _cartItems = cartItems;
-        _totalPrice = totalPrice;
-      });
-
-      // Update total price in Firebase
-      _updateTotalPriceInFirebase(totalPrice);
     });
   }
 
@@ -81,21 +49,18 @@ class _PaymentPageState extends State<payment> {
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    // Handle payment success
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Payment Successful: ${response.paymentId}')),
     );
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    // Handle payment error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Payment Failed: ${response.code} - ${response.message}')),
     );
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    // Handle external wallet
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('External Wallet: ${response.walletName}')),
     );
@@ -104,7 +69,7 @@ class _PaymentPageState extends State<payment> {
   void openCheckout() {
     var options = {
       'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay API key
-      'amount': (_totalPrice * 100).toInt(), // Total amount in paise
+      'amount': (widget.totalPrice * 100).toInt(), // Total amount in paise
       'name': 'DABBAWALA',
       'description': 'Payment for Order',
       'prefill': {
@@ -128,63 +93,129 @@ class _PaymentPageState extends State<payment> {
     final _paymentItems = [
       PaymentItem(
         label: 'Total',
-        amount: _totalPrice.toString(),
+        amount: widget.totalPrice.toString(),
         status: PaymentItemStatus.final_price,
       )
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Page',style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text('Payment Page',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: TColor.primary,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: GestureDetector(
-                onTap: openCheckout,
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  decoration: BoxDecoration(
-                    color: TColor.primary,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.5),
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
+      body: Column(
+        children: [
+          // Display Cart Items
+          Expanded(
+            child: widget.cartItems.isEmpty
+                ? Center(
+              child: Text(
+                "Your cart is empty",
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            )
+                : ListView.builder(
+              itemCount: widget.cartItems.length,
+              itemBuilder: (context, index) {
+                final item = widget.cartItems[index];
+                return ListTile(
+                  leading: Image.asset(item['image']), // Display image
+                  title: Text(item['name']),
+                  subtitle: Text('Day: ${item['day']} - Price: \$${item['price']}'),
+                );
+              },
+            ),
+          ),
+          // Display Total Price
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    spreadRadius: 5,
                   ),
-                  child: Text(
-                    'Pay with Razorpay',
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Price:',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    '\$${widget.totalPrice.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Payment Buttons
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: GestureDetector(
+                    onTap: openCheckout,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      decoration: BoxDecoration(
+                        color: TColor.primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.green.withOpacity(0.5),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'Pay with Razorpay',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                if (_gpayConfig != null)
+                  GooglePayButton(
+                    paymentConfiguration: _gpayConfig!,
+                    paymentItems: _paymentItems,
+                    onPaymentResult: (result) {
+                      print('Google Pay result: $result');
+                    },
+                    loadingIndicator: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (_gpayConfig != null)
-              GooglePayButton(
-                paymentConfiguration: _gpayConfig!,
-                paymentItems: _paymentItems,
-                onPaymentResult: (result) {
-                  print('Google Pay result: $result');
-                },
-                loadingIndicator: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

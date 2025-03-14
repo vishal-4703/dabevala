@@ -47,7 +47,7 @@ class sub extends StatelessWidget {
                     title: 'MONTHLY',
                     price: '₹3000',
                     color: Colors.teal.shade400,
-                    features: ['Veg', 'Non-Veg', 'Fast Delivery', 'Special Discounts'],
+                    features: ['Veg', 'Non-Veg', 'Special Discounts'],
                     context: context,
                   ),
                   _buildPricingCard(

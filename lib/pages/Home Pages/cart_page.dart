@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:animate_do/animate_do.dart'; // For animations
+import 'package:your_project_name/pages/Home%20Pages/profiles%20pages/payment.dart';
+
+
 
 class CartPage extends StatefulWidget {
   @override
@@ -110,7 +113,7 @@ class _CartPageState extends State<CartPage> {
         title: Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Cart',
+            'Order',
             style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 22),
           ),
         ),
@@ -197,7 +200,15 @@ class _CartPageState extends State<CartPage> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, 'payment');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => payment(
+                        cartItems: cartItems,
+                        totalPrice: totalPrice,
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 16),

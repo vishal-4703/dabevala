@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import '../pages/Home Pages/profiles pages/logout.dart';
 import 'addmenu.dart';
-import 'dabbawala_list_screen.dart';
 import 'customer_list_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,7 +15,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _screens = [
     CustomerListScreen(),
     Menu(),
-    DabbawalaListScreen(),
     logout(),
   ];
 
@@ -41,7 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
         backgroundColor: Colors.teal.shade700,
         centerTitle: true,
-        elevation: 4,
+        elevation: 3,
         automaticallyImplyLeading: false,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(5)),
@@ -59,7 +57,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         items: <Widget>[
           Icon(Icons.people, size: 30, color: Colors.white),
           Icon(Icons.restaurant_menu, size: 30, color: Colors.white),
-          Icon(Icons.list, size: 30, color: Colors.white),
           Icon(Icons.logout, size: 30, color: Colors.redAccent),
         ],
         index: _selectedIndex,

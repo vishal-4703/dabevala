@@ -7,6 +7,11 @@ import '../widgets/dabbawala_card.dart';
 import 'order_details_screen.dart';
 
 class DabbawalaListScreen extends StatefulWidget {
+  final List<Map<String, dynamic>> cartItems;
+  final double totalPrice;
+
+  DabbawalaListScreen({required this.cartItems, required this.totalPrice});
+
   @override
   _DabbawalaListScreenState createState() => _DabbawalaListScreenState();
 }
@@ -28,12 +33,14 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
   Future<void> fetchData() async {
     try {
       List<Dabbawala> dabbawalas = await dabbawalaService.fetchDabbawalas();
+      print("Fetched Dabbawalas: ${dabbawalas.length}"); // Debug log
       setState(() {
         allDabbawalas = dabbawalas;
         filteredDabbawalas = dabbawalas;
         isLoading = false;
       });
     } catch (error) {
+      print("Error fetching data: $error"); // Debug log
       setState(() {
         hasError = true;
         errorMessage = error.toString();
@@ -122,7 +129,8 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
                 SizedBox(height: 5),
                 Text(
                   errorMessage,
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                  style: GoogleFonts.poppins(
+                      fontSize: 14, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
@@ -133,9 +141,11 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                   ),
-                  child: Text("Retry", style: GoogleFonts.poppins(color: Colors.white)),
+                  child: Text("Retry",
+                      style: GoogleFonts.poppins(color: Colors.white)),
                 ),
               ],
             ),
@@ -182,20 +192,26 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 itemCount: filteredDabbawalas.length,
                 itemBuilder: (context, index) {
+                  final dabbawala = filteredDabbawalas[index];
+                  print(
+                      "Displaying Dabbawala: ${dabbawala.name}"); // Debug log
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OrderDetailsScreen(
-                            dabbawala: filteredDabbawalas[index],
-                          ),
+                          builder: (context) =>
+                              OrderDetailsScreen(
+                                dabbawala: dabbawala,
+                                cartItems: widget.cartItems, // Pass cartItems
+                                totalPrice: widget.totalPrice, // Pass totalPrice
+                              ),
                         ),
                       );
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 12.0),
-                      child: DabbawalaCard(dabbawala: filteredDabbawalas[index]),
+                      child: DabbawalaCard(dabbawala: dabbawala),
                     ),
                   );
                 },
@@ -212,7 +228,8 @@ class _DabbawalaListScreenState extends State<DabbawalaListScreen> {
                     SizedBox(height: 10),
                     Text(
                       "No Dabbawalas found.",
-                      style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey),
+                      style: GoogleFonts.poppins(
+                          fontSize: 16, color: Colors.grey),
                     ),
                   ],
                 ),

@@ -1,77 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'dabbawala_list_screen.dart'; // Import the DabbawalaListScreen
 
-class PaymentDetailsScreen extends StatefulWidget {
-  @override
-  _PaymentDetailsScreenState createState() => _PaymentDetailsScreenState();
-}
+class PaymentDetailsScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> cartItems;
+  final double totalPrice;
 
-class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
-  String? userId;
-  bool isLoading = true;
-  double totalPrice = 0.0;
-  List<Map<String, dynamic>> cartItems = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserAndCartItems();
-  }
-
-  void fetchUserAndCartItems() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print("User is not signed in");
-      setState(() => isLoading = false);
-      return;
-    }
-
-    userId = user.uid;
-    DatabaseReference ref = FirebaseDatabase.instance.ref("cartItems/$userId");
-
-    ref.once().then((DatabaseEvent event) {
-      print("Database Snapshot: ${event.snapshot.value}"); // Debugging print
-
-      if (event.snapshot.exists && event.snapshot.value != null) {
-        try {
-          Map<String, dynamic> data =
-          Map<String, dynamic>.from(event.snapshot.value as Map);
-          double total = 0.0;
-          List<Map<String, dynamic>> items = [];
-
-          data.forEach((key, value) {
-            if (value is Map) {
-              double itemPrice =
-                  double.tryParse(value["price"]?.toString() ?? "0.0") ?? 0.0;
-              int quantity =
-                  int.tryParse(value["quantity"]?.toString() ?? "1") ?? 1;
-              double itemTotal = itemPrice * quantity;
-              total += itemTotal;
-
-              items.add({
-                "name": value["name"] ?? "Unknown Item",
-                "price": itemPrice,
-                "quantity": quantity,
-                "total": itemTotal,
-              });
-            }
-          });
-
-          setState(() {
-            cartItems = items;
-            totalPrice = total;
-          });
-        } catch (e) {
-          print("Error parsing data: $e");
-        }
-      }
-      setState(() => isLoading = false);
-    }).catchError((error) {
-      print("Error fetching cart items: $error");
-      setState(() => isLoading = false);
-    });
-  }
+  PaymentDetailsScreen({required this.cartItems, required this.totalPrice});
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +16,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(20),
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
@@ -94,8 +26,7 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
                   SizedBox(height: 20),
                   Text(
                     'Payment Successful!',
-                    style: TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -108,32 +39,17 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             SizedBox(height: 20),
             Divider(),
             SizedBox(height: 10),
-            Text("Items Purchased:",
-                style:
-                TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text("Items Purchased:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            cartItems.isEmpty
-                ? Center(
-              child: Text("No items found.",
-                  style: TextStyle(
-                      fontSize: 16, color: Colors.redAccent)),
-            )
-                : Expanded(
+            Expanded(
               child: ListView.builder(
                 itemCount: cartItems.length,
                 itemBuilder: (context, index) {
                   final item = cartItems[index];
                   return ListTile(
-                    title: Text(item["name"],
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold)),
-                    subtitle: Text(
-                        "Qty: ${item["quantity"]} x ₹${item["price"].toStringAsFixed(2)}"),
-                    trailing: Text(
-                        "₹${item["total"].toStringAsFixed(2)}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green)),
+                    title: Text(item["name"], style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text("Price: ₹${item["price"]}"),
+                    trailing: Text("₹${item["price"]}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
                   );
                 },
               ),
@@ -142,18 +58,43 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
             SizedBox(height: 10),
             Text(
               "Total Amount: ₹${totalPrice.toStringAsFixed(2)}",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
             ),
             SizedBox(height: 10),
             Text(
-              "Paid via Paytm",
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal),
+              "Paid with Razorpay",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
+            ),
+            SizedBox(height: 20), // Space before the button
+            // Assign Button
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to DabbawalaListScreen and pass data
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DabbawalaListScreen(
+                        cartItems: cartItems, // Pass cart items
+                        totalPrice: totalPrice, // Pass total price
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  'Assign',
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  minimumSize: Size(double.infinity, 50), // Full-width button
+                ),
+              ),
             ),
           ],
         ),

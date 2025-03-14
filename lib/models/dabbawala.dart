@@ -1,22 +1,21 @@
 class Dabbawala {
   final String id;
   final String name;
-  final String contact; // Added contact field
+  final String contact;
   final int orderCount;
 
   Dabbawala({
     required this.id,
     required this.name,
-    required this.contact, // Added here
+    required this.contact,
     required this.orderCount,
   });
 
-  // Factory method to create a Dabbawala from a Firebase document
-  factory Dabbawala.fromMap(Map<String, dynamic> data) {
+  factory Dabbawala.fromMap(Map<dynamic, dynamic> data, String id) {
     return Dabbawala(
-      id: data['id'] ?? '',
-      name: data['name'] ?? 'Unknown',
-      contact: data['contact'] ?? 'N/A', // Added here
+      id: id,
+      name: data['name'] ?? 'No Name',
+      contact: data['contact'] ?? 'N/A',
       orderCount: data['orderCount'] ?? 0,
     );
   }
