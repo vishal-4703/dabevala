@@ -134,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       buildMenuItem(context, Icons.notifications, 'Notifications', '3', 'NotificationsPage'),
                       buildMenuItem(context, Icons.lock, 'Password Update', '', 'forgetpassword'),
                       buildMenuItem(context, Icons.delivery_dining, 'RealTime Tracking', '', 'Realtime'),
-                      buildMenuItem(context, Icons.payment, 'Payment', '', 'payment'),
+                      buildMenuItem(context, Icons.home, 'Address', '', 'AddressPage'),
                       // buildMenuItem(context, Icons.card_membership, 'Membership Cards', '', 'sub'),
                       buildMenuItem(context, Icons.settings_suggest_outlined, 'About Us', '', 'AboutUsPage'),
                       buildMenuItem(context, Icons.logout_rounded, 'Log Out', '', 'logout'),

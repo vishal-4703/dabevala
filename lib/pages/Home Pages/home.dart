@@ -1,5 +1,5 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
@@ -7,6 +7,8 @@ import 'cart_page.dart';
 import 'profile.dart';
 import 'profiles pages/NextPage.dart';
 import 'subscription.dart';
+
+
 
 class FoodGoHomePage extends StatefulWidget {
   @override
@@ -123,7 +125,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
         });
       },
     ),
-    sub(), // Assuming you have a SubscriptionPage
+    sub(),
     CartPage(),
     ProfilePage(),
   ];
@@ -142,14 +144,16 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            Text('DABBAWALA', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('DABBAWALA', style: TextStyle(fontSize: 20,color: Colors.white, fontWeight: FontWeight.bold)),
           ],
         ),
         backgroundColor: Colors.teal.shade700,
         elevation: 4,
         actions: [
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, 'profile'),
+            onTap: () {
+              Navigator.pushNamed(context, 'ProfilePage');
+            },
             child: Padding(
               padding: EdgeInsets.only(right: 16),
               child: CircleAvatar(
@@ -163,7 +167,7 @@ class _FoodGoHomePageState extends State<FoodGoHomePage> {
       body: _pages[_selectedIndex].animate().fade(duration: 600.ms).slideY(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, 'MenuPage'),
-        child: Icon(Icons.fastfood, color: Colors.white),
+        child: Icon(Icons.fastfood, color: Colors.amberAccent),
         backgroundColor: Colors.teal.shade700,
         elevation: 6,
       ),
@@ -238,8 +242,8 @@ class HomeContent extends StatelessWidget {
               onSubmitted: onSearch,
             ).animate().fade(duration: 600.ms),
 
-            SizedBox(height: 20),
-            _buildCategoryList(context, '🌟 Today\'s Offer', todaysOffer, isHorizontal: true),
+            SizedBox(),
+            _buildCategoryList(context, '', todaysOffer, isHorizontal: true),
             SizedBox(height: 20),
             _buildCategoryList(context, '🎉 Special Offers', offers, isHorizontal: true),
             SizedBox(height: 20),

@@ -1,19 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class forgetpassword extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+
+  Future<void> _sendPasswordResetEmail(BuildContext context) async {
+    try {
+
+      if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid email address.')),
+        );
+        return;
+      }
+
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _emailController.text.trim(),
+      );
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent! Check your inbox.')),
+      );
+
+
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      // Handle specific Firebase errors
+      String errorMessage = 'An error occurred. Please try again.';
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email address.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is invalid.';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        default:
+          errorMessage = e.message ?? 'An unknown error occurred.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      // Handle generic errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An unexpected error occurred. Please try again.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: FadeInLeft(
           child: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
         ),
         title: FadeInDown(
-          child: Text(
+          child: const Text(
             'FORGET PASSWORD',
             style: TextStyle(
               color: Colors.black,
@@ -32,14 +83,14 @@ class forgetpassword extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Center(
                 child: BounceInDown(
                   child: Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [Colors.purpleAccent, Colors.deepPurple],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -52,7 +103,7 @@ class forgetpassword extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.lock_outline,
                       size: 120,
                       color: Colors.black,
@@ -60,34 +111,24 @@ class forgetpassword extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               ZoomIn(
-                child: _buildGlassmorphismTextField('Current Password', Icons.lock),
+                child: _buildGlassmorphismTextField('Email', Icons.email, _emailController),
               ),
-              SizedBox(height: 20),
-              ZoomIn(
-                delay: Duration(milliseconds: 300),
-                child: _buildGlassmorphismTextField('New Password', Icons.lock_outline),
-              ),
-              SizedBox(height: 20),
-              ZoomIn(
-                delay: Duration(milliseconds: 600),
-                child: _buildGlassmorphismTextField('Confirm New Password', Icons.lock_reset),
-              ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Center(
                 child: JelloIn(
-                  delay: Duration(milliseconds: 800),
+                  delay: const Duration(milliseconds: 800),
                   child: _buildGradientButton(context),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: Swing(
-                  delay: Duration(milliseconds: 1000),
+                  delay: const Duration(milliseconds: 1000),
                   child: TextButton(
                     onPressed: () {},
-                    child: Text(
+                    child: const Text(
                       'Need Help?',
                       style: TextStyle(
                         color: Colors.deepPurpleAccent,
@@ -106,7 +147,7 @@ class forgetpassword extends StatelessWidget {
     );
   }
 
-  Widget _buildGlassmorphismTextField(String label, IconData icon) {
+  Widget _buildGlassmorphismTextField(String label, IconData icon, TextEditingController controller) {
     return FadeInUp(
       child: Container(
         decoration: BoxDecoration(
@@ -121,15 +162,15 @@ class forgetpassword extends StatelessWidget {
               color: Colors.deepPurpleAccent.withOpacity(0.4),
               blurRadius: 20,
               spreadRadius: 3,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: TextField(
-          obscureText: true,
+          controller: controller,
           decoration: InputDecoration(
             labelText: label,
-            labelStyle: TextStyle(color: Colors.black, fontSize: 16),
+            labelStyle: const TextStyle(color: Colors.black, fontSize: 16),
             prefixIcon: Icon(icon, color: Colors.black),
             filled: true,
             fillColor: Colors.transparent,
@@ -138,7 +179,7 @@ class forgetpassword extends StatelessWidget {
               borderSide: BorderSide.none,
             ),
           ),
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
     );
@@ -146,15 +187,15 @@ class forgetpassword extends StatelessWidget {
 
   Widget _buildGradientButton(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, 'forgetpassword2'),
+      onTap: () => _sendPasswordResetEmail(context),
       child: Bounce(
-        delay: Duration(milliseconds: 500),
+        delay: const Duration(milliseconds: 500),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 18),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [Color(0xFF7F00FF), Color(0xFFE100FF)],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
@@ -164,13 +205,13 @@ class forgetpassword extends StatelessWidget {
               BoxShadow(
                 color: Colors.purpleAccent.withOpacity(0.6),
                 blurRadius: 20,
-                offset: Offset(0, 5),
+                offset: const Offset(0, 5),
               ),
             ],
           ),
           alignment: Alignment.center,
-          child: Text(
-            'UPDATE PASSWORD',
+          child: const Text(
+            'SEND RESET LINK',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

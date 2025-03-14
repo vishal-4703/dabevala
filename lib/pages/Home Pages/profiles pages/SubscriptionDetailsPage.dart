@@ -78,7 +78,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
             style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ),
@@ -86,7 +86,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple.shade900, Colors.blue],
+            colors: [Colors.teal.shade400, Colors.teal.shade100],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -101,7 +101,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           )
@@ -116,7 +116,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -134,10 +134,10 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                 SizedBox(height: 15),
                 ...features!.map((feature) => FadeInUp(
                   child: ListTile(
-                    leading: Icon(Icons.check_circle, color: Colors.greenAccent),
+                    leading: Icon(Icons.check_circle, color: Colors.blueAccent),
                     title: Text(
                       feature,
-                      style: GoogleFonts.poppins(fontSize: 16, color: Colors.white70),
+                      style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
                     ),
                   ),
                 )),
@@ -145,7 +145,7 @@ class _SubscriptionDetailsPageState extends State<SubscriptionDetailsPage> {
                 BounceInUp(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, 'payment');
+                      Navigator.pushNamed(context, 'Subpay');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amberAccent,

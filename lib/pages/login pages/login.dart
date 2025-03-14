@@ -21,7 +21,6 @@ class _LoginState extends State<login> {
     return Scaffold(
       body: Stack(
         children: [
-
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -164,6 +163,12 @@ class _LoginState extends State<login> {
                                   prefs.setBool('isLoggedIn', true);
 
                                   Navigator.pushNamed(context, 'DashboardScreen');
+                                } else if (email == 'dabbawala@gmail.com' && password == 'dabbawala12345') {
+                                  // Set SharedPreferences after dabbawala login
+                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  prefs.setBool('isLoggedIn', true);
+
+                                  Navigator.pushNamed(context, 'DabbawalaPanelPage');
                                 } else {
                                   // Regular user login with Firebase
                                   try {
