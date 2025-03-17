@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:pay/pay.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -20,15 +21,17 @@ class Subpay extends StatefulWidget {
 
 class _SubpayState extends State<Subpay> {
   late Razorpay _razorpay;
+  static const platform = MethodChannel('com.example.payment/phonepe');
   PaymentConfiguration? _gpayConfig;
 
-  final DatabaseReference _subscriptionRef = FirebaseDatabase.instance
+  DatabaseReference _subscriptionRef = FirebaseDatabase.instance
       .ref()
       .child('subscriptions')
-      .child('GihS4gXKbJSXjkgs03rwLzYCCXo1'); // Updated User ID
+      .child('mHgwiq1U2pc2rNQ8JHjhdkCQhrH2'); // Correct User ID
 
   String _plan = "Loading...";
   double _price = 0.0;
+  List<String> _features = [];
 
   @override
   void initState() {
@@ -43,13 +46,12 @@ class _SubpayState extends State<Subpay> {
 
   Future<void> _loadGooglePayConfiguration() async {
     try {
-      final gpayConfig =
-      await PaymentConfiguration.fromAsset('assets/gpay.json');
+      final gpayConfig = await PaymentConfiguration.fromAsset('assets/gpay.json');
       setState(() {
         _gpayConfig = gpayConfig;
       });
     } catch (e) {
-      debugPrint("Google Pay config error: $e");
+      print("Google Pay config error: $e");
     }
   }
 
@@ -67,7 +69,6 @@ class _SubpayState extends State<Subpay> {
         setState(() {
           _plan = "No Plan Found";
           _price = 0.0;
-
         });
       }
     });
@@ -77,15 +78,14 @@ class _SubpayState extends State<Subpay> {
     if (priceValue == null || priceValue.toString().trim().isEmpty) {
       return 0.0;
     }
-    String priceString =
-    priceValue.toString().replaceAll(RegExp(r'[^0-9.]'), '');
+    String priceString = priceValue.toString().replaceAll(RegExp(r'[^0-9.]'), '');
     return double.tryParse(priceString) ?? 0.0;
   }
 
   @override
   void dispose() {
-    _razorpay.clear();
     super.dispose();
+    _razorpay.clear();
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
@@ -96,9 +96,7 @@ class _SubpayState extends State<Subpay> {
 
   void _handlePaymentError(PaymentFailureResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(
-              'Payment Failed: ${response.code} - ${response.message}')),
+      SnackBar(content: Text('Payment Failed: ${response.code} - ${response.message}')),
     );
   }
 
@@ -110,7 +108,7 @@ class _SubpayState extends State<Subpay> {
 
   void openCheckout() {
     var options = {
-      'key': 'rzp_test_1DP5mmOlF5G5ag', // Replace with your Razorpay Key
+      'key': 'rzp_test_1DP5mmOlF5G5ag',
       'amount': (_price * 100).toInt(),
       'name': 'DABBAWALA',
       'description': 'Subscription Payment',
@@ -135,7 +133,7 @@ class _SubpayState extends State<Subpay> {
     final _paymentItems = [
       PaymentItem(
         label: 'Total',
-        amount: _price.toStringAsFixed(2),
+        amount: _price.toString(),
         status: PaymentItemStatus.final_price,
       )
     ];
@@ -153,62 +151,65 @@ class _SubpayState extends State<Subpay> {
         backgroundColor: TColor.primary,
       ),
       body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Plan: $_plan',
-                style: GoogleFonts.poppins(
-                    fontSize: 24, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Plan: $_plan',
+              style: GoogleFonts.poppins(
+                  fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'Price: ₹$_price',
+              style: GoogleFonts.poppins(fontSize: 20, color: Colors.black),
+            ),
+            SizedBox(height: 10),
+            if (_features.isNotEmpty)
+              Column(
+                children: _features
+                    .map((feature) => Text(
+                  "• $feature",
+                  style: GoogleFonts.poppins(fontSize: 16),
+                ))
+                    .toList(),
               ),
-              SizedBox(height: 8),
-              Text(
-                'Price: ₹${_price.toStringAsFixed(2)}',
-                style: GoogleFonts.poppins(fontSize: 20, color: Colors.black),
-              ),
-              SizedBox(height: 24),
-              GestureDetector(
-                onTap: openCheckout,
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  decoration: BoxDecoration(
-                    color: TColor.primary,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: TColor.primary.withAlpha(128), // 50% opacity
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    'Pay with Razorpay',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            SizedBox(height: 20),
+            GestureDetector(
+              onTap: openCheckout,
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                decoration: BoxDecoration(
+                  color: TColor.primary,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.5),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
                     ),
+                  ],
+                ),
+                child: Text(
+                  'Pay with Razorpay',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-              if (_gpayConfig != null)
-                GooglePayButton(
-                  paymentConfiguration: _gpayConfig!,
-                  paymentItems: _paymentItems,
-                  onPaymentResult: (result) {
-                    print('Google Pay result: $result');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Payment Successful via GPay')),
-                    );
-                  },
-                  loadingIndicator: Center(child: CircularProgressIndicator()),
-                ),
-            ],
-          ),
+            ),
+            SizedBox(height: 16),
+            if (_gpayConfig != null)
+              GooglePayButton(
+                paymentConfiguration: _gpayConfig!,
+                paymentItems: _paymentItems,
+                onPaymentResult: (result) {
+                  print('Google Pay result: $result');
+                },
+                loadingIndicator: Center(child: CircularProgressIndicator()),
+              ),
+          ],
         ),
       ),
     );
