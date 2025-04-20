@@ -91,7 +91,7 @@ class _RealtimeTrackingState extends State<Realtime> with SingleTickerProviderSt
         _markers.add(Marker(
           markerId: MarkerId('customer_location'),
           position: position,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ));
         _markers.add(Marker(
           markerId: MarkerId('delivery_boy_location'),

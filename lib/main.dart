@@ -5,6 +5,7 @@ import 'pages/Home Pages/profiles pages/About Us.dart';
 import 'pages/Home Pages/profiles pages/Notifications.dart';
 import 'pages/Home Pages/profiles pages/SubscriptionDetailsPage.dart';
 import 'pages/Home Pages/profiles pages/address.dart';
+import 'pages/Home Pages/profiles pages/chatbot.dart';
 import 'pages/Home Pages/profiles pages/subpay.dart';
 import 'pages/Splash_Screen.dart';
 import 'screens/AddMenuItemPage.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         'forgetpassword2': (context) => forgetpassword2(),
         'FoodDeliveryScreen': (context) => FoodDeliveryScreen(),
         'ProfilePage': (context) => ProfilePage(),
+        'ChatbotPage': (context) => ChatbotPage(),
         'FoodItemScreen': (context) => FoodListPage(),
         'NotificationsPage': (context) => NotificationsPage(),
         'AboutUsPage': (context) => AboutUsPage(),

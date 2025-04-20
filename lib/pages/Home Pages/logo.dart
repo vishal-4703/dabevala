@@ -100,7 +100,7 @@ class FoodDeliveryScreen extends StatelessWidget {
                       '____नमस्ते तुमचे स्वागत आहे____',
                       style: GoogleFonts.poppins(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

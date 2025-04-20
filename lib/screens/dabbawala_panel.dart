@@ -8,7 +8,8 @@ class DabbawalaPanelPage extends StatefulWidget {
   _DabbawalaPanelPageState createState() => _DabbawalaPanelPageState();
 }
 
-class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTickerProviderStateMixin {
+class _DabbawalaPanelPageState extends State<DabbawalaPanelPage>
+    with SingleTickerProviderStateMixin {
   final DatabaseReference _dabbawalaRef = FirebaseDatabase.instance.ref().child('dabbawalas');
   final DatabaseReference _orderRef = FirebaseDatabase.instance.ref().child('orders');
 
@@ -18,6 +19,11 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
   String searchQuery = '';
   String statusFilter = 'All';
   late TabController _tabController;
+
+  // Helper method for opacity conversion
+  Color withCustomOpacity(Color color, double opacity) {
+    return color.withAlpha((opacity * 255).round());
+  }
 
   // All possible status values
   final List<String> allStatusOptions = [
@@ -43,7 +49,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     _tabController = TabController(length: 2, vsync: this);
     _fetchData();
 
-    // Set system UI overlay style for a more professional look
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
@@ -58,20 +63,16 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
 
   Future<void> _fetchData() async {
     try {
-      print("Fetching data...");
-
       // Fetch Dabbawalas
       final dabbawalaSnapshot = await _dabbawalaRef.get();
       if (dabbawalaSnapshot.exists && dabbawalaSnapshot.value is Map) {
         final data = Map<String, dynamic>.from(dabbawalaSnapshot.value as Map);
-        print("Dabbawalas Data: $data");
-
         setState(() {
           dabbawalas = data.entries.map((entry) {
             final dabbawalaData = Map<String, dynamic>.from(entry.value);
             return {
-              'key': entry.key, // Dabbawala ID
-              'name': dabbawalaData['name'] ?? 'No Name',
+              'key': entry.key,
+              'name': dabbawalaData['name'] ?? ' Name',
               'contact': dabbawalaData['contact'] ?? 'N/A',
               'orderCount': dabbawalaData['orderCount'] ?? 0,
               'area': dabbawalaData['area'] ?? 'Unknown Area',
@@ -81,35 +82,29 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             };
           }).toList();
         });
-      } else {
-        print("No Dabbawala data found.");
       }
 
       // Fetch Orders
       final orderSnapshot = await _orderRef.get();
       if (orderSnapshot.exists && orderSnapshot.value is Map) {
         final data = Map<String, dynamic>.from(orderSnapshot.value as Map);
-        print("Orders Data: $data");
-
         setState(() {
           orders = data.entries.map((entry) {
             final orderData = Map<String, dynamic>.from(entry.value);
             return {
-              'key': entry.key, // Firebase order ID
+              'key': entry.key,
               'orderId': orderData['orderId'] ?? 'N/A',
               'dabbawalaId': orderData['dabbawalaId'] ?? 'N/A',
               'status': orderData['status'] ?? 'Pending',
               'totalPrice': orderData['totalPrice'] ?? 0,
               'timestamp': orderData['timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
-              //'customerName': orderData['customerName'] ?? 'Unknown Customer',
+              'customerName': orderData['customerName'] ?? ' Customer',
               'items': orderData['items'] ?? 1,
-              //'address': orderData['address'] ?? 'N/A',
+              'address': orderData['address'] ?? 'N/A',
               'paymentMethod': orderData['paymentMethod'] ?? 'Online',
             };
           }).toList();
         });
-      } else {
-        print("No Order data found.");
       }
     } catch (e) {
       print("Error fetching data: $e");
@@ -118,12 +113,9 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     }
   }
 
-  // Update order status
   Future<void> _updateOrderStatus(String orderKey, String newStatus) async {
     try {
       await _orderRef.child(orderKey).update({'status': newStatus});
-
-      // Update local state
       setState(() {
         final orderIndex = orders.indexWhere((order) => order['key'] == orderKey);
         if (orderIndex != -1) {
@@ -134,7 +126,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Order status updated to $newStatus'),
-          backgroundColor: statusColors[newStatus]?.withOpacity(0.8) ?? Colors.black87,
+          backgroundColor: withCustomOpacity(statusColors[newStatus] ?? Colors.black87, 0.8),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -151,15 +143,11 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     }
   }
 
-  // Get filtered orders
   List<Map<String, dynamic>> get filteredOrders {
     return orders.where((order) {
-      final matchesSearch =
-          order['orderId'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
-              order['customerName'].toString().toLowerCase().contains(searchQuery.toLowerCase());
-
+      final matchesSearch = order['orderId'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
+          order['customerName'].toString().toLowerCase().contains(searchQuery.toLowerCase());
       final matchesStatus = statusFilter == 'All' || order['status'] == statusFilter;
-
       return matchesSearch && matchesStatus;
     }).toList();
   }
@@ -179,11 +167,12 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                 title: Text(
                   "Dabbawala Panel",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                     shadows: [
                       Shadow(
                         blurRadius: 4.0,
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withAlpha((0.3 * 255).round()),
                         offset: Offset(0, 2),
                       ),
                     ],
@@ -209,7 +198,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                       top: -20,
                       child: CircleAvatar(
                         radius: 80,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withAlpha((0.1 * 255).round()),
                       ),
                     ),
                     Positioned(
@@ -217,7 +206,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                       bottom: -30,
                       child: CircleAvatar(
                         radius: 60,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withAlpha((0.1 * 255).round()),
                       ),
                     ),
                   ],
@@ -248,13 +237,12 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
         )
             : Column(
           children: [
-            // Tab Bar with custom design
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withAlpha((0.05 * 255).round()),
                     blurRadius: 5,
                     offset: Offset(0, 2),
                   ),
@@ -276,8 +264,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                 ],
               ),
             ),
-
-            // Search and Filter
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -289,11 +275,24 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                         color: Colors.grey.shade100,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withAlpha((0.05 * 255).round()),
                             blurRadius: 3,
                             offset: Offset(0, 1),
                           ),
                         ],
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Search...",
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -304,7 +303,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                       color: Colors.grey.shade100,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withAlpha((0.05 * 255).round()),
                           blurRadius: 3,
                           offset: Offset(0, 1),
                         ),
@@ -318,7 +317,8 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                           _showFilterDialog();
                         },
                         child: Padding(
-                          padding: const EdgeInsets.all(1),
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(Icons.filter_list, color: Colors.grey.shade700),
                         ),
                       ),
                     ),
@@ -326,9 +326,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                 ],
               ),
             ),
-
-            // Status filter chips - horizontal scrollable
-            if (_tabController.index == 0) // Only show for Orders tab
+            if (_tabController.index == 0)
               Container(
                 height: 50,
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -340,16 +338,11 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                   ],
                 ),
               ),
-
-            // Tab Content
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  // Orders Tab
                   _buildOrdersTab(),
-
-                  // Dabbawalas Tab
                   _buildDabbawalasTab(),
                 ],
               ),
@@ -360,7 +353,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build filter chip
   Widget _buildFilterChip(String status) {
     final isSelected = statusFilter == status;
     final color = status == 'All' ? Colors.grey.shade700 : (statusColors[status] ?? Colors.grey);
@@ -379,7 +371,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
         backgroundColor: Colors.grey.shade100,
         shape: StadiumBorder(
           side: BorderSide(
-            color: isSelected ? Colors.transparent : color.withOpacity(0.3),
+            color: isSelected ? Colors.transparent : color.withAlpha((0.3 * 255).round()),
             width: 1,
           ),
         ),
@@ -392,7 +384,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build orders tab
   Widget _buildOrdersTab() {
     if (filteredOrders.isEmpty) {
       return Center(
@@ -411,9 +402,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             ),
             SizedBox(height: 8),
             Text(
-              statusFilter != 'All'
-                  ? "Try changing your filter"
-                  : "Add new orders to get started",
+              statusFilter != 'All' ? "Try changing your filter" : "Add new orders to get started",
               style: TextStyle(
                 color: Colors.grey.shade600,
               ),
@@ -430,14 +419,14 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
         final order = filteredOrders[index];
         final dabbawala = dabbawalas.firstWhere(
               (d) => d['key'] == order['dabbawalaId'],
-          orElse: () => {'name': 'Unknown Dabbawala'},
+          orElse: () => {'name': 'Dabbawala'},
         );
 
         return Card(
           margin: EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withAlpha((0.1 * 255).round()),
           child: Column(
             children: [
               Padding(
@@ -453,7 +442,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                             Container(
                               padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.deepOrange.withOpacity(0.1),
+                                color: Colors.deepOrange.withAlpha((0.1 * 255).round()),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
@@ -503,7 +492,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.deepOrange.shade50,
+                          color: Colors.deepOrange.withAlpha((0.1 * 255).round()),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -520,13 +509,13 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                     SizedBox(height: 12),
                     _buildInfoRow(
                       Icons.location_on_outlined,
-                      order['address'] ?? 'N/A',
+                      order['address'],
                       maxLines: 2,
                     ),
                     SizedBox(height: 12),
                     _buildInfoRow(
                       Icons.payment_outlined,
-                      "Payment: ${order['paymentMethod'] ?? 'Cash'}",
+                      "Payment: ${order['paymentMethod']}",
                     ),
                     SizedBox(height: 16),
                     Row(
@@ -573,9 +562,10 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       child: DropdownButton<String>(
-                        value: allStatusOptions.contains(order['status']) ? order['status'] : 'Pending', // Fallback to 'Pending'
+                        value: allStatusOptions.contains(order['status']) ? order['status'] : 'Pending',
                         underline: SizedBox(),
-                        icon: Icon(Icons.arrow_drop_down, color: statusColors[order['status']] ?? Colors.grey),
+                        icon: Icon(Icons.arrow_drop_down,
+                            color: statusColors[order['status']] ?? Colors.grey),
                         style: TextStyle(
                           color: statusColors[order['status']] ?? Colors.grey.shade800,
                           fontWeight: FontWeight.w500,
@@ -617,23 +607,17 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                     _buildActionButton(
                       icon: Icons.visibility_outlined,
                       label: "View Details",
-                      onTap: () {
-                        // View order details
-                      },
+                      onTap: () {},
                     ),
                     _buildActionButton(
                       icon: Icons.print_outlined,
                       label: "Print",
-                      onTap: () {
-                        // Print order
-                      },
+                      onTap: () {},
                     ),
                     _buildActionButton(
                       icon: Icons.phone_outlined,
                       label: "Call",
-                      onTap: () {
-                        // Call customer
-                      },
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -645,7 +629,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build action button
   Widget _buildActionButton({
     required IconData icon,
     required String label,
@@ -674,7 +657,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build dabbawalas tab
   Widget _buildDabbawalasTab() {
     return GridView.builder(
       padding: EdgeInsets.all(16),
@@ -692,7 +674,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
         return Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withAlpha((0.1 * 255).round()),
           child: Stack(
             children: [
               Column(
@@ -720,7 +702,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                         backgroundColor: Colors.white,
                         child: CircleAvatar(
                           radius: 34,
-                          backgroundColor: Colors.deepOrange.shade100,
+                          backgroundColor: Colors.deepOrange.withAlpha((0.1 * 255).round()),
                           backgroundImage: dabbawala['profileImage'] != null
                               ? NetworkImage(dabbawala['profileImage'])
                               : null,
@@ -755,7 +737,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                         ),
                         SizedBox(height: 4),
                         Text(
-                          dabbawala['area'] ?? 'Unknown Area',
+                          dabbawala['area'] ?? ' Area',
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 12,
@@ -823,7 +805,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withAlpha((0.7 * 255).round()),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -843,15 +825,14 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build status badge
   Widget _buildStatusBadge(String status) {
     final color = statusColors[status] ?? Colors.grey;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha((0.1 * 255).round()),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withAlpha((0.3 * 255).round()), width: 1),
       ),
       child: Text(
         status,
@@ -864,7 +845,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build info row for orders
   Widget _buildInfoRow(IconData icon, String text, {Widget? trailing, int maxLines = 1}) {
     return Row(
       children: [
@@ -886,7 +866,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Build info row for dabbawala
   Widget _buildDabbawalaInfoRow(String label, String value, {Widget? trailing, bool isHighlighted = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -904,7 +883,7 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
           decoration: BoxDecoration(
             border: Border.all(color: Colors.deepOrange.shade200),
             borderRadius: BorderRadius.circular(12),
-            color: Colors.deepOrange.withOpacity(0.05),
+            color: Colors.deepOrange.withAlpha((0.05 * 255).round()),
           ),
           child: Text(
             value,
@@ -920,13 +899,11 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             fontWeight: FontWeight.bold,
             color: Colors.grey.shade800,
           ),
-        )
-        ),
+        )),
       ],
     );
   }
 
-  // Build rating stars
   Widget _buildRatingStars(double rating) {
     return Row(
       children: List.generate(5, (index) {
@@ -941,7 +918,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Show filter dialog
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -991,7 +967,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Show dabbawala options
   void _showDabbawalaOptions(Map<String, dynamic> dabbawala) {
     showModalBottomSheet(
       context: context,
@@ -1015,7 +990,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             title: Text("Edit Profile"),
             onTap: () {
               Navigator.pop(context);
-              // Add edit profile logic
             },
           ),
           ListTile(
@@ -1023,10 +997,8 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             title: Text("View Orders"),
             onTap: () {
               Navigator.pop(context);
-              // Filter orders by this dabbawala
               setState(() {
                 _tabController.animateTo(0);
-                // You could add additional filtering here
               });
             },
           ),
@@ -1035,7 +1007,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             title: Text("Send Message"),
             onTap: () {
               Navigator.pop(context);
-              // Add messaging logic
             },
           ),
           ListTile(
@@ -1046,7 +1017,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
             title: Text(dabbawala['isActive'] == true ? "Deactivate Account" : "Activate Account"),
             onTap: () {
               Navigator.pop(context);
-              // Toggle active status
               _toggleDabbawalaStatus(dabbawala);
             },
           ),
@@ -1056,7 +1026,6 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
     );
   }
 
-  // Toggle dabbawala active status
   Future<void> _toggleDabbawalaStatus(Map<String, dynamic> dabbawala) async {
     try {
       final newStatus = !(dabbawala['isActive'] ?? true);
@@ -1086,35 +1055,5 @@ class _DabbawalaPanelPageState extends State<DabbawalaPanelPage> with SingleTick
         ),
       );
     }
-  }
-
-  // Show add new dialog
-  void _showAddNewDialog() {
-    final isOrderTab = _tabController.index == 0;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isOrderTab ? "Add New Order" : "Add New Dabbawala"),
-        content: Text(
-            isOrderTab
-                ? "This would open a form to add a new order."
-                : "This would open a form to add a new dabbawala."
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepOrange,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

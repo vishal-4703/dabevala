@@ -440,31 +440,31 @@ class HomeContent extends StatelessWidget {
                     children: [
                       Text(
                         item['itemName'],
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 5),
                       Text(
                         '\₹${item['price']}',
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                        style: TextStyle(color: Colors.white70, fontSize: 20),
                       ),
                       SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add to cart or navigate to details
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          'Order Now',
-                          style: TextStyle(color: Colors.deepOrange),
-                        ),
-                      ),
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     // Add to cart or navigate to details
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Colors.white,
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(10),
+                      //     ),
+                      //   ),
+                      //   child: Text(
+                      //     'Order Now',
+                      //     style: TextStyle(color: Colors.deepOrange),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
